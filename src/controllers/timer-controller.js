@@ -25,9 +25,55 @@ class TimerController {
 
   start () {
     setInterval(async function () {
-      const crMetrics = await _this.gatherCRMetrics()
+      await _this.handleMetrics()
+    }, 60000 * 60) // One hour
+  }
+
+  async handleMetrics () {
+    try {
+      const crMetrics = await this.gatherCRMetrics()
       console.log('crMetrics: ', crMetrics)
-    }, 20000)
+
+      const hash = await this.writeMetrics(crMetrics)
+      console.log('hash: ', hash)
+    } catch (err) {
+      console.error('Error in handleMetrics(): ', err)
+      // Do not throw error. This is a top-level function.
+    }
+  }
+
+  // Write collected metrics to the P2WDB.
+  async writeMetrics (metricData) {
+    try {
+      // console.log(`metricData: ${JSON.stringify(metricData, null, 2)}`)
+
+      // Burn PSF token to pay for P2WDB write.
+      const txid = await this.adapters.wallet.burnPsf()
+      console.log('burn txid: ', txid)
+      console.log(`https://simpleledger.info/tx/${txid}`)
+
+      // generate signature.
+      const now = new Date()
+      const message = now.toISOString()
+      const signature = await this.adapters.wallet.generateSignature(message)
+
+      const p2wdbObj = {
+        txid,
+        signature,
+        message,
+        appId: 'metricsTest666',
+        data: metricData
+      }
+
+      // Add offer to P2WDB.
+      const hash = await this.adapters.p2wdb.write(p2wdbObj)
+      // console.log('hash: ', hash)
+
+      return hash
+    } catch (err) {
+      console.error('Error in writeMetrics()')
+      throw err
+    }
   }
 
   // Obtain metrics on Circuit Relays.
