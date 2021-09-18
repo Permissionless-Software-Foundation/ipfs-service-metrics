@@ -61,7 +61,7 @@ class TimerController {
         txid,
         signature,
         message,
-        appId: 'metricsTest666',
+        appId: 'psf-ipfs-metrics-0001',
         data: metricData
       }
 
