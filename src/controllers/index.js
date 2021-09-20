@@ -12,6 +12,8 @@ const Adapters = require('../adapters')
 // Load the JSON RPC Controller.
 const JSONRPC = require('./json-rpc')
 
+const TimerController = require('./timer-controller')
+
 // Load the Clean Architecture Use Case libraries.
 const UseCases = require('../use-cases')
 // const useCases = new UseCases({ adapters })
@@ -33,6 +35,12 @@ class Controllers {
     // this.attachRESTControllers(app)
 
     this.attachRPCControllers()
+
+    this.timerController = new TimerController({
+      adapters: this.adapters,
+      useCases: this.useCases
+    })
+    this.timerController.start()
   }
 
   // Top-level function for this library.

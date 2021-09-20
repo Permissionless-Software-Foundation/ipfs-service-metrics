@@ -65,5 +65,7 @@ system-user-*.json
 orbitdb
 ipfsdata
 .ipfsdata
+wallet.json
+run-dev.sh
 
 !README.md
