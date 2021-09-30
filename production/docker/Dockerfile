@@ -29,18 +29,16 @@ WORKDIR /home/safeuser
 
 # Clone the rest.bitcoin.com repository
 WORKDIR /home/safeuser
-RUN git clone https://github.com/Permissionless-Software-Foundation/ipfs-service-provider
+RUN git clone https://github.com/Permissionless-Software-Foundation/ipfs-service-metrics
 
 # Switch to the desired branch. `master` is usually stable,
 # and `stage` has the most up-to-date changes.
-WORKDIR /home/safeuser/ipfs-service-provider
+WORKDIR /home/safeuser/ipfs-service-metrics
 
 # For development: switch to unstable branch
 #RUN git checkout ct-unstable
 
 # Install dependencies
-#RUN mkdir .ipfsdata
-RUN npm install -g @mapbox/node-pre-gyp
 RUN npm install
 
 # Generate the API docs
