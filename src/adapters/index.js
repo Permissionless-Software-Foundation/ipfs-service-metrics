@@ -55,8 +55,11 @@ class Adapters {
       await this.ipfs.start()
 
       // Open the wallet file
-      const walletData = await this.wallet.openWallet()
-      // console.log('adapters/index.js walletData: ', walletData)
+      let walletData = {}
+      if (process.env.SVC_ENV !== 'test') {
+        walletData = await this.wallet.openWallet()
+        // console.log('adapters/index.js walletData: ', walletData)
+      }
 
       // Instance the wallet.
       await this.wallet.instanceWallet(walletData, this.bchjs)
