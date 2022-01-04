@@ -11,7 +11,7 @@
 // Global npm libraries
 // const IPFS = require('ipfs')
 // const IPFS = require('@chris.troutner/ipfs')
-const IPFSembedded = require('ipfs')
+// const IPFSembedded = require('ipfs')
 const IPFSexternal = require('ipfs-http-client')
 const fs = require('fs')
 const http = require('http')
@@ -27,10 +27,11 @@ class IpfsAdapter {
     this.config = config
 
     // Choose the IPFS constructor based on the config settings.
-    this.IPFS = IPFSembedded // default
-    if (this.config.isProduction) {
-      this.IPFS = IPFSexternal
-    }
+    // this.IPFS = IPFSembedded // default
+    // if (this.config.isProduction) {
+    //   this.IPFS = IPFSexternal
+    // }
+    this.IPFS = IPFSexternal
 
     // Properties of this class instance.
     this.isReady = false
