@@ -6,12 +6,16 @@ Forked from [ipfs-service-provider](https://github.com/Permissionless-Software-F
 
 ## Requirements
 
-- node **^14.17.0**
-- npm **^7.13.0**
+- node **^14.18.2**
+- npm **^8.3.0**
+- Docker **^20.10.8**
+- Docker Compose **^1.27.4**
 
 ## Installation
 
 ### Development Environment
+
+**Note:** This software now uses an external go-ipfs IPFS node. The instructions below have not been updated to reflect this.
 
 A development environment will allow you modify the code on-the-fly and contribute to the code base of this repository. [PM2](https://www.npmjs.com/package/pm2) is recommended for running this code base as an IPFS Circuit Relay.
 
