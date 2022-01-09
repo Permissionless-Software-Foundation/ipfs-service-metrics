@@ -91,21 +91,34 @@ class Server {
       const success = await this.adminLib.createSystemUser()
       if (success) console.log('System admin user created.')
 
-      // Attach the other IPFS controllers
-      await controllers.attachControllers(app)
+      // Attach the other IPFS controllers.
+      // Skip if this is a test environment.
+      if (config.env !== 'test') {
+        await controllers.attachControllers(app)
+      }
 
       // ipfs-coord has a memory leak. This app shuts down after 4 hours. It
       // expects to be run by Docker or pm2, which can automatically restart
       // the app.
-      setTimeout(function () {
-        process.exit(0)
-      }, 60000 * 60 * 2) // 2 hours
+      // setTimeout(function () {
+      //   process.exit(0)
+      // }, 60000 * 60 * 2) // 2 hours
 
       return app
     } catch (err) {
       console.error('Could not start server. Error: ', err)
+
+      console.log(
+        'Exiting after 5 seconds. Depending on process manager to restart.'
+      )
+      await sleep(5000)
+      process.exit(1)
     }
   }
+}
+
+function sleep (ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 module.exports = Server

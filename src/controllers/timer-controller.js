@@ -26,7 +26,7 @@ class TimerController {
   start () {
     setInterval(async function () {
       await _this.handleMetrics()
-    }, 60000 * 60) // One hour
+    }, 60000 * 60 * 12) // Twelve hours
   }
 
   async handleMetrics () {
