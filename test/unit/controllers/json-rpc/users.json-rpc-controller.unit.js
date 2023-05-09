@@ -3,18 +3,20 @@
 */
 
 // Public npm libraries
-const jsonrpc = require('jsonrpc-lite')
-const sinon = require('sinon')
-const assert = require('chai').assert
-const { v4: uid } = require('uuid')
+import jsonrpc from 'jsonrpc-lite'
+
+import sinon from 'sinon'
+import { assert } from 'chai'
+import { v4 as uid } from 'uuid'
+
+// Local libraries
+import UserRPC from '../../../../src/controllers/json-rpc/users/index.js'
+
+import adapters from '../../mocks/adapters/index.js'
+import UseCasesMock from '../../mocks/use-cases/index.js'
 
 // Set the environment variable to signal this is a test.
 process.env.SVC_ENV = 'test'
-
-// Local libraries
-const UserRPC = require('../../../../src/controllers/json-rpc/users')
-const adapters = require('../../mocks/adapters')
-const UseCasesMock = require('../../mocks/use-cases')
 
 describe('#UserRPC', () => {
   let uut
@@ -333,7 +335,7 @@ describe('#UserRPC', () => {
       assert.equal(result.endpoint, 'updateUser')
       assert.equal(result.success, false)
       assert.equal(result.status, 422)
-      assert.include(result.message, 'Cannot read property')
+      assert.include(result.message, 'Cannot read')
     })
   })
 
@@ -375,7 +377,7 @@ describe('#UserRPC', () => {
       assert.equal(result.endpoint, 'getUser')
       assert.equal(result.success, false)
       assert.equal(result.status, 422)
-      assert.include(result.message, 'Cannot read property')
+      assert.include(result.message, 'Cannot read')
     })
   })
 

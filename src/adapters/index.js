@@ -5,22 +5,23 @@
 */
 
 // Public NPM libraries
-const BCHJS = require('@psf/bch-js')
+import BCHJS from '@psf/bch-js'
 
 // Load individual adapter libraries.
-const IPFSAdapter = require('./ipfs')
-const LocalDB = require('./localdb')
-const LogsAPI = require('./logapi')
-const Passport = require('./passport')
-const Nodemailer = require('./nodemailer')
-// const { wlogger } = require('./wlogger')
-const JSONFiles = require('./json-files')
-const FullStackJWT = require('./fullstack-jwt')
-const BCHAdapter = require('./bch')
-const WalletAdapter = require('./wallet')
-const P2wdbAdapter = require('./p2wdb')
+import IPFSAdapter from './ipfs/index.js'
+import LocalDB from './localdb/index.js'
+import LogsAPI from './logapi.js'
+import Passport from './passport.js'
+import Nodemailer from './nodemailer.js'
+import BCHAdapter from './bch.js'
+import WalletAdapter from './wallet.js'
+import P2wdbAdapter from './p2wdb.js'
 
-const config = require('../../config')
+// const { wlogger } = require('./wlogger')
+import JSONFiles from './json-files.js'
+
+import FullStackJWT from './fullstack-jwt.js'
+import config from '../../config/index.js'
 
 class Adapters {
   constructor (localConfig = {}) {
@@ -33,8 +34,7 @@ class Adapters {
     this.jsonFiles = new JSONFiles()
     this.bchjs = new BCHJS()
     this.config = config
-    this.bch = new BCHAdapter()
-    this.wallet = new WalletAdapter()
+    this.walletAdapter = new WalletAdapter()
     this.p2wdb = new P2wdbAdapter()
 
     // Get a valid JWT API key and instance bch-js.
@@ -52,22 +52,31 @@ class Adapters {
       }
 
       // Start the IPFS node.
-      await this.ipfs.start()
-
-      // Open the wallet file
-      let walletData = {}
-      if (process.env.SVC_ENV !== 'test') {
-        walletData = await this.wallet.openWallet()
-        // console.log('adapters/index.js walletData: ', walletData)
+      // Do not start these adapters if this is an e2e test.
+      if (this.config.env !== 'test') {
+        if (this.config.useIpfs) {
+          await this.ipfs.start()
+        }
+      } else {
+        // These lines are here to ensure code coverage hits 100%.
+        console.log('Not starting IPFS node since this is an e2e test.')
       }
 
       // Instance the wallet.
-      await this.wallet.instanceWallet(walletData, this.bchjs)
+      const walletData = await this.walletAdapter.openWallet()
+      await this.walletAdapter.instanceWallet(walletData, this.bchjs)
+      this.wallet = this.walletAdapter.bchWallet
+
+      this.bch = new BCHAdapter({ wallet: this.wallet })
+
+      console.log('Async Adapters have been started.')
+
+      return true
     } catch (err) {
-      console.error('Error in adapters/index.js/start()')
+      console.error('Error in adapters/index.js/start(): ')
       throw err
     }
   }
 }
 
-module.exports = Adapters
+export default Adapters

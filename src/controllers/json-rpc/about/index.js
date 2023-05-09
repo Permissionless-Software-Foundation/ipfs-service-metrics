@@ -1,12 +1,15 @@
 /*
   This is the JSON RPC router for the users API
+
+  CT 3/5/22: This library can probably be deleted. Handling of the /about endpoint
+  is now directly controlled by the ipfs-coord library.
 */
 
 // Public npm libraries
-const jsonrpc = require('jsonrpc-lite')
+import jsonrpc from 'jsonrpc-lite'
 
 // Local libraries
-const config = require('../../../../config')
+import config from '../../../../config/index.js'
 
 class AboutRPC {
   constructor (localConfig) {
@@ -33,6 +36,8 @@ class AboutRPC {
   // This is a bit different than other router libraries, because there is
   // only one response, which is a string about this node.
   async aboutRouter (rpcData) {
+    console.log('debugging: aboutRouter from ipfs-service-provider triggered')
+
     return {
       success: true,
       status: 200,
@@ -43,4 +48,4 @@ class AboutRPC {
   }
 }
 
-module.exports = AboutRPC
+export default AboutRPC

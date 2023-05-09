@@ -3,16 +3,17 @@
 */
 
 // Public npm libraries
-const BCHJS = require('@psf/bch-js')
-const MsgLib = require('bch-message-lib')
+// import BCHJS from '@psf/bch-js'
+// import SlpWallet from 'minimal-slp-wallet'
+import MsgLib from 'bch-message-lib'
 
 class Bch {
-  constructor () {
+  constructor (localConfig = {}) {
     // Encapsulate dependencies
-    this.bchjs = new BCHJS()
+    // this.bchjs = new BCHJS()
     this.PSF_TOKEN_ID =
       '38e97c5d7d3585a2cbf3f9580c82ca33985f9cb0845d4dcce220cb709f9538b0'
-    this.msgLib = new MsgLib({ bchjs: this.bchjs })
+    this.msgLib = new MsgLib({ wallet: localConfig.wallet })
   }
 
   // Verify that the entry was signed by a specific BCH address.
@@ -77,4 +78,5 @@ class Bch {
   }
 }
 
-module.exports = Bch
+// module.exports = Bch
+export default Bch
