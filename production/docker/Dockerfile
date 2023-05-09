@@ -12,7 +12,7 @@ RUN apt-get update
 RUN apt-get install -y sudo git curl nano gnupg wget
 
 #Install Node and NPM
-RUN curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh
+RUN curl -sL https://deb.nodesource.com/setup_16.x -o nodesource_setup.sh
 RUN bash nodesource_setup.sh
 RUN apt-get install -y nodejs build-essential
 
@@ -67,7 +67,7 @@ VOLUME /home/safeuser/keys
 EXPOSE 5010
 
 # Start the application.
-COPY start-production.sh start-production.sh
+#COPY start-production.sh start-production.sh
 CMD ["./start-production.sh"]
 
 #CMD ["npm", "start"]

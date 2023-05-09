@@ -5,8 +5,9 @@
   for this file.
 */
 
-const JwtLib = require('jwt-bch-lib')
-const BCHJS = require('@psf/bch-js')
+import JwtLib from 'jwt-bch-lib'
+
+import BCHJS from '@psf/bch-js'
 
 class FullStackJWT {
   constructor (localConfig = {}) {
@@ -52,12 +53,6 @@ class FullStackJWT {
   // Get's a JWT token from FullStack.cash.
   async getJWT () {
     try {
-      // Skip connecting FullStack.cash auth server to the network if this is an E2E test.
-      if (process.env.TEST_TYPE === 'e2e') {
-        this.apiToken = 'faketoken'
-        return this.apiToken
-      }
-
       // Log into the auth server.
       await this.jwtLib.register()
 
@@ -104,4 +99,4 @@ class FullStackJWT {
   }
 }
 
-module.exports = FullStackJWT
+export default FullStackJWT

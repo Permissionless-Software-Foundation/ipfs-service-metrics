@@ -3,10 +3,15 @@
 */
 
 // Public npm libraries
-const BchWallet = require('minimal-slp-wallet/index')
+import BchWallet from 'minimal-slp-wallet'
 
 // Local libraries
-const JsonFiles = require('./json-files')
+import JsonFiles from './json-files.js'
+
+// Hack to get __dirname back.
+// https://blog.logrocket.com/alternatives-dirname-node-js-es-modules/
+import * as url from 'url'
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
 const WALLET_FILE = `${__dirname.toString()}/../../wallet.json`
 const PROOF_OF_BURN_QTY = 0.01
@@ -122,11 +127,15 @@ class WalletAdapter {
 
   // Create an instance of minimal-slp-wallet. Use data in the wallet.json file,
   // and pass the bch-js information to the minimal-slp-wallet library.
-  async instanceWallet (walletData, bchjs) {
+  async instanceWallet (walletData, bchjs = {}) {
     try {
       // TODO: Throw error if bch-js is not passed in.
       // TODO: throw error if wallet data is not passed in.
 
+      // const advancedConfig = {
+      //   restURL: bchjs.restURL,
+      //   apiToken: bchjs.apiToken
+      // }
       const advancedConfig = {
         restURL: bchjs.restURL,
         apiToken: bchjs.apiToken
@@ -230,4 +239,5 @@ class WalletAdapter {
   }
 }
 
-module.exports = WalletAdapter
+// module.exports = WalletAdapter
+export default WalletAdapter

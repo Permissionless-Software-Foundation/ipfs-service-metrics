@@ -11,13 +11,14 @@
 // Global npm libraries
 // const IPFS = require('ipfs')
 // const IPFS = require('@chris.troutner/ipfs')
-// const IPFSembedded = require('ipfs')
-const IPFSexternal = require('ipfs-http-client')
-const fs = require('fs')
-const http = require('http')
+// import IPFSembedded from 'ipfs';
+
+import { create } from 'ipfs-http-client'
+import fs from 'fs'
+import http from 'http'
 
 // Local libraries
-const config = require('../../../config')
+import config from '../../../config/index.js'
 
 const IPFS_DIR = './.ipfsdata/ipfs'
 
@@ -25,18 +26,17 @@ class IpfsAdapter {
   constructor (localConfig) {
     // Encapsulate dependencies
     this.config = config
+    this.fs = fs
+    this.create = create
 
     // Choose the IPFS constructor based on the config settings.
     // this.IPFS = IPFSembedded // default
     // if (this.config.isProduction) {
     //   this.IPFS = IPFSexternal
     // }
-    this.IPFS = IPFSexternal
 
     // Properties of this class instance.
     this.isReady = false
-
-    this.fs = fs
   }
 
   // Start an IPFS node.
@@ -86,7 +86,7 @@ class IpfsAdapter {
       }
 
       // Create a new IPFS node.
-      this.ipfs = await this.IPFS.create(ipfsOptions)
+      this.ipfs = await this.create(ipfsOptions)
 
       // Set the 'server' profile so the node does not scan private networks.
       await this.ipfs.config.profiles.apply('server')
@@ -103,9 +103,9 @@ class IpfsAdapter {
       console.error('Error in ipfs.js/start()')
 
       // If IPFS crashes because the /blocks directory is full, wipe the directory.
-      if (err.message.includes('No space left on device')) {
-        this.rmBlocksDir()
-      }
+      // if (err.message.includes('No space left on device')) {
+      //   this.rmBlocksDir()
+      // }
 
       throw err
     }
@@ -121,21 +121,21 @@ class IpfsAdapter {
   // Dev Note: It's assumed this node is not pinning any data and that
   // everything in this directory is transient. This folder will regularly
   // fill up and prevent IPFS from starting.
-  rmBlocksDir () {
-    try {
-      const dir = `${IPFS_DIR}/blocks`
-      console.log(`Deleting ${dir} directory...`)
-
-      this.fs.rmdirSync(dir, { recursive: true })
-
-      console.log(`${dir} directory is deleted!`)
-
-      return true // Signal successful execution.
-    } catch (err) {
-      console.log('Error in rmBlocksDir()')
-      throw err
-    }
-  }
+  // rmBlocksDir () {
+  //  try {
+  //    const dir = `${IPFS_DIR}/blocks`
+  //    console.log(`Deleting ${dir} directory...`)
+  //
+  //    this.fs.rmdirSync(dir, { recursive: true })
+  //
+  //    console.log(`${dir} directory is deleted!`)
+  //
+  //    return true // Signal successful execution.
+  //  } catch (err) {
+  //    console.log('Error in rmBlocksDir()')
+  //    throw err
+  //  }
+  // }
 }
 
-module.exports = IpfsAdapter
+export default IpfsAdapter

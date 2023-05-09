@@ -2,12 +2,19 @@
   Mocks for the Adapter library.
 */
 
-const ipfs = {
-  ipfsAdapter: {
-    ipfs: {}
-  },
-  ipfsCoordAdapter: {
-    ipfsCoord: {
+class IpfsAdapter {
+  constructor () {
+    this.ipfs = {
+      files: {
+        stat: () => {}
+      }
+    }
+  }
+}
+
+class IpfsCoordAdapter {
+  constructor () {
+    this.ipfsCoord = {
       useCases: {
         peer: {
           sendPrivateMessage: () => {}
@@ -16,6 +23,12 @@ const ipfs = {
     }
   }
 }
+
+const ipfs = {
+  ipfsAdapter: new IpfsAdapter(),
+  ipfsCoordAdapter: new IpfsCoordAdapter()
+}
+ipfs.ipfs = ipfs.ipfsAdapter.ipfs
 
 const localdb = {
   Users: class Users {
@@ -53,4 +66,4 @@ const localdb = {
   }
 }
 
-module.exports = { ipfs, localdb }
+export default { ipfs, localdb };

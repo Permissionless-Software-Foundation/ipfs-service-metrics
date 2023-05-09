@@ -3,7 +3,7 @@
 */
 
 // Public npm libraries.
-const axios = require('axios')
+import axios from 'axios'
 
 // Global constants
 // const P2WDB_SERVER = 'http://localhost:5001/entry/write'
@@ -48,4 +48,6 @@ class P2wdbAdapter {
   }
 }
 
-module.exports = P2wdbAdapter
+// module.exports = P2wdbAdapter
+
+export default P2wdbAdapter
