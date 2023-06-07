@@ -64,7 +64,7 @@ class Adapters {
 
       // Instance the wallet.
       const walletData = await this.walletAdapter.openWallet()
-      await this.walletAdapter.instanceWallet(walletData, this.bchjs)
+      await this.walletAdapter.instanceWallet(walletData)
       this.wallet = this.walletAdapter.bchWallet
 
       this.bch = new BCHAdapter({ wallet: this.wallet })

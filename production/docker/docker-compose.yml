@@ -3,7 +3,7 @@
 version: '3.9'
 
 services:
-  mongo-ipfs-service:
+  mongo-psf-metrics:
     image: mongo:4.2.0
     container_name: mongo-psf-metrics
     ports:
@@ -43,15 +43,15 @@ services:
     restart: always
 
   psf-metrics:
-    #build: .
-    image: christroutner/ipfs-service-provider:v2.2.13
+    build: .
+    #image: christroutner/ipfs-service-provider:v2.2.13
     container_name: psf-metrics
     logging:
       driver: 'json-file'
       options:
         max-size: '10m'
         max-file: '10'
-    mem_limit: 500mb
+    mem_limit: 1000mb
     links:
       - mongo-psf-metrics
       - ipfs-psf-metrics
@@ -60,4 +60,5 @@ services:
     volumes:
       # - ../data/ipfsdata:/home/safeuser/ipfs-service-provider/.
       - ../../wallet.json:/home/safeuser/ipfs-service-metrics/wallet.json
+      - ./start-production.sh:/home/safeuser/ipfs-service-metrics/start-production.sh
     restart: always

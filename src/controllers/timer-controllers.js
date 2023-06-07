@@ -3,7 +3,14 @@
   kicked off periodicially.
 */
 
+// Global npm libraries
+import { Write } from 'p2wdb'
+
+// Local libraries
 import config from '../../config/index.js'
+
+// const METRICS_PERIOD = 60000 * 1
+const METRICS_PERIOD = 60000 * 60 * 12
 
 class TimerControllers {
   constructor (localConfig = {}) {
@@ -40,7 +47,7 @@ class TimerControllers {
     // Any new timer control functions can be added here. They will be started
     // when the server starts.
     // this.optimizeWalletHandle = setInterval(this.exampleTimerFunc, 60000 * 10)
-    this.handleMetricsHandle = setInterval(this.handleMetrics, 60000 * 1)
+    this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
 
     return true
   }
@@ -67,43 +74,61 @@ class TimerControllers {
 
   async handleMetrics () {
     try {
+      // Disable the interval to prevent multiple executions.
+      clearInterval(this.handleMetricsHandle)
+
       const crMetrics = await this.gatherCRMetrics()
       console.log('crMetrics: ', crMetrics)
 
       const hash = await this.writeMetrics(crMetrics)
       console.log('hash: ', hash)
+
+      // Renable interval
+      this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
     } catch (err) {
       console.error('Error in handleMetrics(): ', err)
       // Do not throw error. This is a top-level function.
+
+      this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
     }
   }
 
   // Write collected metrics to the P2WDB.
   async writeMetrics (metricData) {
     try {
-      // console.log(`metricData: ${JSON.stringify(metricData, null, 2)}`)
+      console.log(`metricData: ${JSON.stringify(metricData, null, 2)}`)
+
+      // Instantiate the Write library
+      const bchWallet = this.adapters.wallet
+      // console.log('bchWallet: ', bchWallet)
+      const write = new Write({ bchWallet })
 
       // Burn PSF token to pay for P2WDB write.
-      const txid = await this.adapters.wallet.burnPsf()
-      console.log('burn txid: ', txid)
-      console.log(`https://simpleledger.info/tx/${txid}`)
+      // const txid = await this.adapters.wallet.burnPsf()
+      // console.log('burn txid: ', txid)
+      // console.log(`https://simpleledger.info/tx/${txid}`)
 
       // generate signature.
-      const now = new Date()
-      const message = now.toISOString()
-      const signature = await this.adapters.wallet.generateSignature(message)
+      // const now = new Date()
+      // const message = now.toISOString()
+      // const signature = await this.adapters.wallet.generateSignature(message)
 
-      const p2wdbObj = {
-        txid,
-        signature,
-        message,
-        appId: 'psf-ipfs-metrics-0001',
-        data: metricData
-      }
+      // const p2wdbObj = {
+      //   txid,
+      //   signature,
+      //   message,
+      //   // appId: 'psf-ipfs-metrics-0001',
+      //   appId: 'psf-ipfs-metrics-test01',
+      //   data: metricData
+      // }
+
+      const appId = 'psf-ipfs-metrics-0002'
+      // const appId = 'psf-ipfs-metrics-test01'
 
       // Add offer to P2WDB.
-      const hash = await this.adapters.p2wdb.write(p2wdbObj)
-      // console.log('hash: ', hash)
+      // const hash = await this.adapters.p2wdb.write(p2wdbObj)
+      const hash = await write.postEntry(metricData, appId)
+      console.log('metrics written to P2WDB: ', hash)
 
       return hash
     } catch (err) {

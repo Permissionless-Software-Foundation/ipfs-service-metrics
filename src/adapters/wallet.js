@@ -136,9 +136,12 @@ class WalletAdapter {
       //   restURL: bchjs.restURL,
       //   apiToken: bchjs.apiToken
       // }
+      // const advancedConfig = {
+      //   restURL: bchjs.restURL,
+      //   apiToken: bchjs.apiToken
+      // }
       const advancedConfig = {
-        restURL: bchjs.restURL,
-        apiToken: bchjs.apiToken
+        interface: 'consumer-api'
       }
 
       // console.log('walletData.mnemonic: ', walletData.mnemonic)
@@ -147,7 +150,8 @@ class WalletAdapter {
       this.bchWallet = new this.BchWallet(walletData.mnemonic, advancedConfig)
 
       // Wait for wallet to initialize.
-      await this.bchWallet.walletInfoPromise
+      // await this.bchWallet.walletInfoPromise
+      await this.bchWallet.initialize()
 
       return true
     } catch (err) {
