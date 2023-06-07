@@ -9,6 +9,8 @@ import { Write } from 'p2wdb'
 // Local libraries
 import config from '../../config/index.js'
 
+const METRICS_PERIOD = 60000 * 1
+
 class TimerControllers {
   constructor (localConfig = {}) {
     // Dependency Injection.
@@ -44,7 +46,7 @@ class TimerControllers {
     // Any new timer control functions can be added here. They will be started
     // when the server starts.
     // this.optimizeWalletHandle = setInterval(this.exampleTimerFunc, 60000 * 10)
-    this.handleMetricsHandle = setInterval(this.handleMetrics, 60000 * 1)
+    this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
 
     return true
   }
@@ -71,14 +73,23 @@ class TimerControllers {
 
   async handleMetrics () {
     try {
+      // Disable the interval to prevent multiple executions.
+      clearInterval(this.handleMetricsHandle)
+
       const crMetrics = await this.gatherCRMetrics()
       console.log('crMetrics: ', crMetrics)
 
       const hash = await this.writeMetrics(crMetrics)
       console.log('hash: ', hash)
+
+      // Renable interval
+      this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
+
     } catch (err) {
       console.error('Error in handleMetrics(): ', err)
       // Do not throw error. This is a top-level function.
+
+      this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
     }
   }
 
