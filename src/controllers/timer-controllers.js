@@ -9,7 +9,8 @@ import { Write } from 'p2wdb'
 // Local libraries
 import config from '../../config/index.js'
 
-const METRICS_PERIOD = 60000 * 1
+// const METRICS_PERIOD = 60000 * 1
+const METRICS_PERIOD = 60000 * 60 * 12
 
 class TimerControllers {
   constructor (localConfig = {}) {
@@ -121,13 +122,13 @@ class TimerControllers {
       //   data: metricData
       // }
 
-      // const appId = 'psf-ipfs-metrics-0001',
-      const appId = 'psf-ipfs-metrics-test01'
+      const appId = 'psf-ipfs-metrics-0002'
+      // const appId = 'psf-ipfs-metrics-test01'
 
       // Add offer to P2WDB.
       // const hash = await this.adapters.p2wdb.write(p2wdbObj)
       const hash = await write.postEntry(metricData, appId)
-      // console.log('hash: ', hash)
+      console.log('metrics written to P2WDB: ', hash)
 
       return hash
     } catch (err) {
