@@ -3,6 +3,10 @@
   kicked off periodicially.
 */
 
+// Global npm libraries
+import { Write } from 'p2wdb'
+
+// Local libraries
 import config from '../../config/index.js'
 
 class TimerControllers {
@@ -39,8 +43,8 @@ class TimerControllers {
   startTimers () {
     // Any new timer control functions can be added here. They will be started
     // when the server starts.
-    // this.optimizeWalletHandle = setInterval(this.exampleTimerFunc, 60000 * 10)
-    this.handleMetricsHandle = setInterval(this.handleMetrics, 60000 * 1)
+    this.optimizeWalletHandle = setInterval(this.exampleTimerFunc, 60000 * 10)
+    // this.handleMetricsHandle = setInterval(this.handleMetrics, 60000 * 1)
 
     return true
   }
@@ -81,28 +85,38 @@ class TimerControllers {
   // Write collected metrics to the P2WDB.
   async writeMetrics (metricData) {
     try {
-      // console.log(`metricData: ${JSON.stringify(metricData, null, 2)}`)
+      console.log(`metricData: ${JSON.stringify(metricData, null, 2)}`)
+
+      // Instantiate the Write library
+      const bchWallet = this.adapters.wallet
+      // console.log('bchWallet: ', bchWallet)
+      const write = new Write({ bchWallet })
 
       // Burn PSF token to pay for P2WDB write.
-      const txid = await this.adapters.wallet.burnPsf()
-      console.log('burn txid: ', txid)
-      console.log(`https://simpleledger.info/tx/${txid}`)
+      // const txid = await this.adapters.wallet.burnPsf()
+      // console.log('burn txid: ', txid)
+      // console.log(`https://simpleledger.info/tx/${txid}`)
 
       // generate signature.
-      const now = new Date()
-      const message = now.toISOString()
-      const signature = await this.adapters.wallet.generateSignature(message)
+      // const now = new Date()
+      // const message = now.toISOString()
+      // const signature = await this.adapters.wallet.generateSignature(message)
 
-      const p2wdbObj = {
-        txid,
-        signature,
-        message,
-        appId: 'psf-ipfs-metrics-0001',
-        data: metricData
-      }
+      // const p2wdbObj = {
+      //   txid,
+      //   signature,
+      //   message,
+      //   // appId: 'psf-ipfs-metrics-0001',
+      //   appId: 'psf-ipfs-metrics-test01',
+      //   data: metricData
+      // }
+
+      // const appId = 'psf-ipfs-metrics-0001',
+      const appId = 'psf-ipfs-metrics-test01'
 
       // Add offer to P2WDB.
-      const hash = await this.adapters.p2wdb.write(p2wdbObj)
+      // const hash = await this.adapters.p2wdb.write(p2wdbObj)
+      const hash = await write.postEntry(metricData, appId)
       // console.log('hash: ', hash)
 
       return hash
