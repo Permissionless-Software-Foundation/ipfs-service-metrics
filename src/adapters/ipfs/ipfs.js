@@ -74,6 +74,7 @@ class IpfsAdapter {
         }
       }
 
+      console.log('IPFS host: ', this.config.ipfsHost)
       const ipfsOptionsExternal = {
         host: this.config.ipfsHost,
         port: this.config.ipfsApiPort,
