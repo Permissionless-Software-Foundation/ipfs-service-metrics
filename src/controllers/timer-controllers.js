@@ -84,7 +84,6 @@ class TimerControllers {
 
       // Renable interval
       this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
-
     } catch (err) {
       console.error('Error in handleMetrics(): ', err)
       // Do not throw error. This is a top-level function.
