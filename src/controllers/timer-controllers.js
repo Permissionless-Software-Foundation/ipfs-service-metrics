@@ -9,8 +9,8 @@ import { Write } from 'p2wdb'
 // Local libraries
 import config from '../../config/index.js'
 
-// const METRICS_PERIOD = 60000 * 1
-const METRICS_PERIOD = 60000 * 60 * 12
+const METRICS_PERIOD = 60000 * 1
+// const METRICS_PERIOD = 60000 * 60 * 12
 
 class TimerControllers {
   constructor (localConfig = {}) {
@@ -80,8 +80,8 @@ class TimerControllers {
       const crMetrics = await this.gatherCRMetrics()
       console.log('crMetrics: ', crMetrics)
 
-      const hash = await this.writeMetrics(crMetrics)
-      console.log('hash: ', hash)
+      // const hash = await this.writeMetrics(crMetrics)
+      // console.log('hash: ', hash)
 
       // Renable interval
       this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
@@ -142,11 +142,11 @@ class TimerControllers {
     try {
       const relayData =
         this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode.relayData
-      // console.log('relayData: ', relayData)
+      console.log('relayData: ', relayData)
 
       const peerData =
         this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode.peerData
-      // console.log('peerData: ', peerData)
+      console.log('peerData: ', JSON.stringify(peerData, null, 2))
 
       const relayMetrics = []
 
