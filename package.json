@@ -1,6 +1,6 @@
 {
   "name": "ipfs-service-metrics",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Monitors Circuit Relays and service providers on the network for uptime, save the metrics to the P2WDB.",
   "main": "index.js",
   "type": "module",
