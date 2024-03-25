@@ -68,5 +68,6 @@ ipfsdata
 wallet.json
 run-dev.sh
 data/
+run-dev.sh
 
 !README.md

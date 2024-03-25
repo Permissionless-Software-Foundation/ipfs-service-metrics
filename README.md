@@ -6,8 +6,8 @@ Forked from [ipfs-service-provider](https://github.com/Permissionless-Software-F
 
 ## Requirements
 
-- node **^14.18.2**
-- npm **^8.3.0**
+- node **^16.20.2**
+- npm **^8.19.4**
 - Docker **^20.10.8**
 - Docker Compose **^1.27.4**
 
