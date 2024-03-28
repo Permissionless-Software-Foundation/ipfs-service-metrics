@@ -82,13 +82,7 @@ class TimerControllers {
       // const crMetrics = await this.gatherCRMetrics()
       // console.log('crMetrics: ', crMetrics)
 
-      // Get all the nodes providing CashStack web3 services
-      const walletPeers = await this.getCashStackServices()
-      console.log('walletPeers: ', walletPeers)
-
-      // Get all the nodes providing File Pin services
-      const pinPeers = await this.getFilePinServices()
-      console.log('pinPeers: ', pinPeers)
+      await this.useCases.metrics.compileReport()
 
       // const hash = await this.writeMetrics(crMetrics)
       // console.log('hash: ', hash)
@@ -144,74 +138,6 @@ class TimerControllers {
     } catch (err) {
       console.error('Error in writeMetrics()')
       throw err
-    }
-  }
-
-  // Get a list of all IPFS nodes running the ipfs-bch-wallet-service.
-  async getCashStackServices () {
-    try {
-      const peerData =
-        this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode.peerData
-      // console.log('peerData: ', JSON.stringify(peerData, null, 2))
-
-      // Filter the peers so that only those advertising a wallet service are left.
-      const walletServices = peerData.filter(x => x.data.jsonLd.protocol === 'ipfs-bch-wallet-service')
-      // console.log('walletServices: ', JSON.stringify(walletServices, null, 2))
-
-      const walletPeers = []
-      for (let i = 0; i < walletServices.length; i++) {
-        const thisWalletService = walletServices[i]
-
-        // Create a summary object of the peer.
-        const thisPeer = {
-          name: thisWalletService.data.jsonLd.name,
-          protocol: thisWalletService.data.jsonLd.protocol,
-          version: thisWalletService.data.jsonLd.version,
-          encryptPubKey: thisWalletService.data.encryptPubKey,
-          ipfsId: thisWalletService.data.jsonLd.identifier,
-          multiaddr: thisWalletService.multiaddr
-        }
-        walletPeers.push(thisPeer)
-      }
-
-      return walletPeers
-    } catch (err) {
-      console.error('Error in getCashStackServices(): ', err)
-      // Do not throw error. This is a top-level function.
-    }
-  }
-
-  // Get a list of all IPFS nodes runing the ipfs-file-pin-service.
-  async getFilePinServices () {
-    try {
-      const peerData =
-        this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode.peerData
-      // console.log('peerData: ', JSON.stringify(peerData, null, 2))
-
-      // Filter the peers so that only the ones advertising file pinning service are left.
-      const filePinServices = peerData.filter(x => x.data.jsonLd.protocol === 'ipfs-file-pin-service')
-      // console.log('filePinServices: ', JSON.stringify(filePinServices, null, 2))
-
-      const pinPeers = []
-      for (let i = 0; i < filePinServices.length; i++) {
-        const thisPinService = filePinServices[i]
-
-        // Create a summary object of the peer.
-        const thisPeer = {
-          name: thisPinService.data.jsonLd.name,
-          protocol: thisPinService.data.jsonLd.protocol,
-          version: thisPinService.data.jsonLd.version,
-          encryptPubKey: thisPinService.data.encryptPubKey,
-          ipfsId: thisPinService.data.jsonLd.identifier,
-          multiaddr: thisPinService.multiaddr
-        }
-        pinPeers.push(thisPeer)
-      }
-
-      return pinPeers
-    } catch (err) {
-      console.error('Error in filePinServices(): ', err)
-      // Do not throw error. This is a top-level function.
     }
   }
 
