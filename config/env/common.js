@@ -142,7 +142,9 @@ export default {
 
     // v2 Circuit Relay server (FullStack.cash)
     // '/ip4/78.46.129.7/tcp/4001/p2p/12D3KooWFQ11GQ5NubsJGhYZ4X3wrAGimLevxfm6HPExCrMYhpSL'
-  ]
+  ],
 
   // END IPFS CONFIGURATION
+
+  version
 }

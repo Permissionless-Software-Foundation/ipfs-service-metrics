@@ -4,8 +4,12 @@
   library.
 */
 
+// Global npm libraries
+import PSFFPP from 'psffpp'
+
 // Local libraries
 import wlogger from '../adapters/wlogger.js'
+import config from '../../config/index.js'
 
 class MetricUseCases {
   constructor (localConfig = {}) {
@@ -19,6 +23,8 @@ class MetricUseCases {
 
     // Encapsulate dependencies
     this.wlogger = wlogger
+    this.config = config
+    this.PSFFPP = PSFFPP
 
     // Bind 'this' object to all subfunctions
     this.getCashStackServices = this.getCashStackServices.bind(this)
@@ -101,13 +107,68 @@ class MetricUseCases {
     try {
       // Get all the nodes providing CashStack web3 services
       const walletPeers = await this.getCashStackServices()
-      console.log('walletPeers: ', walletPeers)
+      // console.log('walletPeers: ', walletPeers)
 
       // Get all the nodes providing File Pin services
       const pinPeers = await this.getFilePinServices()
-      console.log('pinPeers: ', pinPeers)
+      // console.log('pinPeers: ', pinPeers)
+
+      return {
+        metricsVersion: this.config.version,
+        walletPeers,
+        pinPeers
+      }
     } catch (err) {
       console.error('Error in compileReport()')
+      throw err
+    }
+  }
+
+  // Publish the JSON report to IPFS and generate a Pin Claim on the blockchain.
+  // Example code that inspired this function:
+  // https://github.com/ipfs-examples/helia-examples/blob/main/examples/helia-101/301-networking.js
+  async publishReport (inObj = {}) {
+    try {
+      const { report } = inObj
+
+      this.psffpp = new this.PSFFPP({ wallet: this.adapters.wallet })
+
+      // we will use this TextEncoder to turn strings into Uint8Arrays
+      const encoder = new TextEncoder()
+      const fs = this.adapters.ipfs.ipfs.fs
+
+      // add the bytes to your node and receive a unique content identifier
+      const binReport = encoder.encode(JSON.stringify(report))
+      const cid = await fs.addBytes(binReport)
+
+      // const size = binReport.length
+      // let fileSizeInMegabytes = Math.ceil(size / 10000)/100
+      // if(fileSizeInMegabytes < 0.01) fileSizeInMegabytes = 0.01
+
+      // const wallet = this.adapter.wallet
+
+      const writePrice = await this.psffpp.getMcWritePrice()
+      console.log(`writePrice: ${writePrice}`)
+
+      const now = new Date()
+      const filename = `psf-metrics-${now.toISOString()}.json`
+
+      const pinObj = {
+        cid,
+        filename,
+        fileSizeInMegabytes: 1
+      }
+
+      const { pobTxid, claimTxid } = await this.psffpp.createPinClaim(pinObj)
+      console.log('pobTxid: ', pobTxid)
+      console.log('claimTxid: ', claimTxid)
+
+      return {
+        pobTxid,
+        claimTxid
+      }
+    } catch (err) {
+      console.error('Error in publishReport()')
       throw err
     }
   }

@@ -96,8 +96,9 @@ class Wallet {
 
       // Try to open the wallet.json file.
       try {
-        // console.log('this.config.walletFile: ', this.config.walletFile)
+        console.log('this.config.walletFile: ', this.config.walletFile)
         walletData = await this.jsonFiles.readJSON(this.config.walletFile)
+        console.log('JSON file walletData: ', walletData)
       } catch (err) {
         // Create a new wallet file if one does not already exist.
         console.log('Wallet file not found. Creating new wallet.json file.')
@@ -128,6 +129,9 @@ class Wallet {
   // its UTXOs (wallet balance and tokens).
   async instanceWallet (walletData = {}, advancedConfig = {}) {
     try {
+      console.log('ping02')
+      console.log('instanceWallet() walletData: ', walletData)
+
       // Instance the wallet without initialization.
       await this.instanceWalletWithoutInitialization(walletData, advancedConfig)
 

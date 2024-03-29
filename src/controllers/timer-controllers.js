@@ -9,7 +9,7 @@ import { Write } from 'p2wdb'
 // Local libraries
 import config from '../../config/index.js'
 
-const METRICS_PERIOD = 60000 * 1
+const METRICS_PERIOD = 60000 * 2
 // const METRICS_PERIOD = 60000 * 60 * 12
 
 class TimerControllers {
@@ -38,8 +38,6 @@ class TimerControllers {
     this.handleMetrics = this.handleMetrics.bind(this)
     this.writeMetrics = this.writeMetrics.bind(this)
     this.gatherCRMetrics = this.gatherCRMetrics.bind(this)
-    this.getCashStackServices = this.getCashStackServices.bind(this)
-    this.getFilePinServices = this.getFilePinServices.bind(this)
 
     // this.startTimers()
   }
@@ -82,7 +80,12 @@ class TimerControllers {
       // const crMetrics = await this.gatherCRMetrics()
       // console.log('crMetrics: ', crMetrics)
 
-      await this.useCases.metrics.compileReport()
+      // Generate a JSON report of network metrics.
+      const report = await this.useCases.metrics.compileReport()
+      console.log('report: ', report)
+
+      // Publish the report to IPFS and generate a Pin Claim.
+      await this.useCases.metrics.publishReport({ report })
 
       // const hash = await this.writeMetrics(crMetrics)
       // console.log('hash: ', hash)

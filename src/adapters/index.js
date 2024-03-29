@@ -44,11 +44,11 @@ class Adapters {
 
   async start () {
     try {
-      let apiToken
+      // let apiToken
       if (this.config.getJwtAtStartup) {
         // Get a JWT token and instantiate bch-js with it. Then pass that instance
         // to all the rest of the apps controllers and adapters.
-        apiToken = await this.fullStackJwt.getJWT()
+        await this.fullStackJwt.getJWT()
         // Instantiate bch-js with the JWT token, and overwrite the placeholder for bch-js.
         this.bchjs = await this.fullStackJwt.instanceBchjs()
       }
@@ -56,9 +56,9 @@ class Adapters {
       // Create a default instance of minimal-slp-wallet without initializing it
       // (without retrieving the wallets UTXOs). This instance will be overwritten
       // if the operator has configured BCH payments.
-      console.log('\nCreating default startup wallet. This wallet may be overwritten.')
-      await this.wallet.instanceWalletWithoutInitialization({}, { apiToken })
-      this.bchjs = this.wallet.bchWallet.bchjs
+      // console.log('\nCreating default startup wallet. This wallet may be overwritten.')
+      // await this.wallet.instanceWalletWithoutInitialization({}, { apiToken })
+      // this.bchjs = this.wallet.bchWallet.bchjs
 
       // Start the IPFS node.
       // Do not start these adapters if this is an e2e test.
@@ -73,8 +73,16 @@ class Adapters {
 
       // Instance the wallet.
       const walletData = await this.walletAdapter.openWallet()
+      console.log('openWallet() called. walletData: ', walletData)
+      console.log('ping01')
       await this.walletAdapter.instanceWallet(walletData)
+      console.log('ping03')
       this.wallet = this.walletAdapter.bchWallet
+      this.bchjs = this.wallet.bchjs
+
+      console.log(`Wallet address: ${this.wallet.walletInfo.address}`)
+      console.log(`Wallet mnemonic: ${this.wallet.walletInfo.mnemonic}`)
+      console.log(`Wallet WIF: ${this.wallet.walletInfo.privateKey}`)
 
       this.bch = new BCHAdapter({ wallet: this.wallet })
 
