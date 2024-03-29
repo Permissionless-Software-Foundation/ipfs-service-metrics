@@ -14,7 +14,7 @@ import LogsAPI from './logapi.js'
 import Passport from './passport.js'
 import Nodemailer from './nodemailer.js'
 import BCHAdapter from './bch.js'
-import WalletAdapter from './wallet.js'
+// import WalletAdapter from './wallet.js'
 import P2wdbAdapter from './p2wdb.js'
 
 // const { wlogger } = require('./wlogger')
@@ -34,7 +34,7 @@ class Adapters {
     this.jsonFiles = new JSONFiles()
     this.bchjs = new BCHJS()
     this.config = config
-    this.walletAdapter = new WalletAdapter()
+    // this.walletAdapter = new WalletAdapter()
     this.p2wdb = new P2wdbAdapter()
     this.wallet = new Wallet(localConfig)
 
@@ -56,9 +56,13 @@ class Adapters {
       // Create a default instance of minimal-slp-wallet without initializing it
       // (without retrieving the wallets UTXOs). This instance will be overwritten
       // if the operator has configured BCH payments.
-      // console.log('\nCreating default startup wallet. This wallet may be overwritten.')
+      console.log('\nCreating default startup wallet. This wallet may be overwritten.')
       // await this.wallet.instanceWalletWithoutInitialization({}, { apiToken })
-      // this.bchjs = this.wallet.bchWallet.bchjs
+
+      const walletData = await this.wallet.openWallet()
+      await this.wallet.instanceWallet(walletData)
+
+      this.bchjs = this.wallet.bchWallet.bchjs
 
       // Start the IPFS node.
       // Do not start these adapters if this is an e2e test.
@@ -72,19 +76,19 @@ class Adapters {
       }
 
       // Instance the wallet.
-      const walletData = await this.walletAdapter.openWallet()
-      console.log('openWallet() called. walletData: ', walletData)
-      console.log('ping01')
-      await this.walletAdapter.instanceWallet(walletData)
-      console.log('ping03')
-      this.wallet = this.walletAdapter.bchWallet
-      this.bchjs = this.wallet.bchjs
+      // const walletData = await this.walletAdapter.openWallet()
+      // console.log('openWallet() called. walletData: ', walletData)
+      // console.log('ping01')
+      // await this.walletAdapter.instanceWallet(walletData)
+      // console.log('ping03')
+      // this.wallet = this.walletAdapter.bchWallet
+      // this.bchjs = this.wallet.bchjs
 
-      console.log(`Wallet address: ${this.wallet.walletInfo.address}`)
-      console.log(`Wallet mnemonic: ${this.wallet.walletInfo.mnemonic}`)
-      console.log(`Wallet WIF: ${this.wallet.walletInfo.privateKey}`)
+      console.log(`Wallet address: ${this.wallet.bchWallet.walletInfo.address}`)
+      console.log(`Wallet mnemonic: ${this.wallet.bchWallet.walletInfo.mnemonic}`)
+      console.log(`Wallet WIF: ${this.wallet.bchWallet.walletInfo.privateKey}`)
 
-      this.bch = new BCHAdapter({ wallet: this.wallet })
+      this.bch = new BCHAdapter({ wallet: this.wallet.bchWallet })
 
       console.log('Async Adapters have been started.')
 

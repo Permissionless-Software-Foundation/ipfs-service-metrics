@@ -28,6 +28,8 @@ class Wallet {
   // and there is no need to hydrate it with UTXO data.
   async instanceWalletWithoutInitialization (walletData = {}, advancedConfig = {}) {
     try {
+      console.log('instanceWalletWithoutInitialization() walletData: ', walletData)
+
       // Use the apiToken from the config settings, if one is not passed-in at
       // run-time.
       if (!advancedConfig.apiToken) {
@@ -98,6 +100,7 @@ class Wallet {
       try {
         console.log('this.config.walletFile: ', this.config.walletFile)
         walletData = await this.jsonFiles.readJSON(this.config.walletFile)
+        walletData = walletData.wallet
         console.log('JSON file walletData: ', walletData)
       } catch (err) {
         // Create a new wallet file if one does not already exist.
