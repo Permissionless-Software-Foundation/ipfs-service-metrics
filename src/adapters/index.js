@@ -44,11 +44,11 @@ class Adapters {
 
   async start () {
     try {
-      // let apiToken
+      let apiToken
       if (this.config.getJwtAtStartup) {
         // Get a JWT token and instantiate bch-js with it. Then pass that instance
         // to all the rest of the apps controllers and adapters.
-        await this.fullStackJwt.getJWT()
+        apiToken = await this.fullStackJwt.getJWT()
         // Instantiate bch-js with the JWT token, and overwrite the placeholder for bch-js.
         this.bchjs = await this.fullStackJwt.instanceBchjs()
       }
@@ -60,7 +60,8 @@ class Adapters {
       // await this.wallet.instanceWalletWithoutInitialization({}, { apiToken })
 
       const walletData = await this.wallet.openWallet()
-      await this.wallet.instanceWallet(walletData)
+      await this.wallet.instanceWalletWithoutInitialization(walletData, { apiToken })
+      // await this.wallet.instanceWallet(walletData)
 
       this.bchjs = this.wallet.bchWallet.bchjs
 

@@ -131,7 +131,16 @@ class MetricUseCases {
     try {
       const { report } = inObj
 
-      this.psffpp = new this.PSFFPP({ wallet: this.adapters.wallet })
+      // Open the wallet and ensure it has up-to-date UTXOs
+      const walletData = await this.adapters.wallet.openWallet()
+      const wallet = await this.adapters.wallet.instanceWallet(walletData)
+      console.log('publishReport() wallet.walletInfo: ', wallet.walletInfo)
+
+      // Make sure the wallet is initialized with UTXOs.
+      await wallet.initialize()
+
+      // Instantiate the PSFFPP library.
+      this.psffpp = new this.PSFFPP({ wallet })
 
       // we will use this TextEncoder to turn strings into Uint8Arrays
       const encoder = new TextEncoder()
@@ -154,7 +163,7 @@ class MetricUseCases {
       const filename = `psf-metrics-${now.toISOString()}.json`
 
       const pinObj = {
-        cid,
+        cid: cid.toString(),
         filename,
         fileSizeInMegabytes: 1
       }
