@@ -7,7 +7,7 @@ services:
     image: mongo:4.2.0
     container_name: mongo-psf-metrics
     ports:
-      - '5555:27017' # <host port>:<container port>
+      - '5565:27017' # <host port>:<container port>
     volumes:
       - ../data/database:/data/db
     command: mongod --logpath=/dev/null # -- quiet
@@ -16,7 +16,7 @@ services:
   ipfs-psf-metrics:
     build: .
     #image: christroutner/ipfs-service-provider:v5.0.1
-    container_name: ipfs-service
+    container_name: ipfs-psf-metrics
     logging:
       driver: 'json-file'
       options:
@@ -26,9 +26,9 @@ services:
     links:
       - mongo-psf-metrics
     ports:
-      - '5010:5010' # <host port>:<container port>
-      - '4001:4001'
-      - '4003:4003'
+      #- '5010:5010' # <host port>:<container port>
+      - '4021:4021'
+      - '4023:4023'
     volumes:
       # - ../data/ipfsdata:/home/safeuser/ipfs-service-provider/.
       - ../../wallet.json:/home/safeuser/ipfs-service-metrics/wallet.json
