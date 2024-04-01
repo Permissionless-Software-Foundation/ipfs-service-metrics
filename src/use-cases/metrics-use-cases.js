@@ -113,8 +113,11 @@ class MetricUseCases {
       const pinPeers = await this.getFilePinServices()
       // console.log('pinPeers: ', pinPeers)
 
+      const now = new Date()
+
       return {
         metricsVersion: this.config.version,
+        createdAt: now.toISOString(),
         walletPeers,
         pinPeers
       }
