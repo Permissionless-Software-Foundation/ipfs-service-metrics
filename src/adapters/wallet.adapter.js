@@ -31,7 +31,7 @@ class Wallet {
   // and there is no need to hydrate it with UTXO data.
   async instanceWalletWithoutInitialization (walletData = {}, advancedConfig) {
     try {
-      console.log('instanceWalletWithoutInitialization() walletData: ', walletData)
+      // console.log('instanceWalletWithoutInitialization() walletData: ', walletData)
 
       if (!advancedConfig) advancedConfig = this.advancedConfig
 
@@ -138,8 +138,7 @@ class Wallet {
   // its UTXOs (wallet balance and tokens).
   async instanceWallet (walletData = {}, advancedConfig) {
     try {
-      console.log('ping02')
-      console.log('instanceWallet() walletData: ', walletData)
+      // console.log('instanceWallet() walletData: ', walletData)
 
       if (!advancedConfig) advancedConfig = this.advancedConfig
 
