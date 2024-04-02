@@ -9,7 +9,7 @@ import { Write } from 'p2wdb'
 // Local libraries
 import config from '../../config/index.js'
 
-const METRICS_PERIOD = 60000 * 60 * 1
+const METRICS_PERIOD = 60000 * 60 * 4
 // const METRICS_PERIOD = 60000 * 60 * 12
 
 class TimerControllers {

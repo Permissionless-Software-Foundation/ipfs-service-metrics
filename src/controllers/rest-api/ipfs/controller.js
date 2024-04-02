@@ -34,6 +34,7 @@ class IpfsRESTControllerLib {
     this.handleError = this.handleError.bind(this)
     this.connect = this.connect.bind(this)
     this.getThisNode = this.getThisNode.bind(this)
+    this.getReport = this.getReport.bind(this)
   }
 
   /**
@@ -121,6 +122,18 @@ class IpfsRESTControllerLib {
     } catch (err) {
       wlogger.error('Error in ipfs/controller.js/getThisNode(): ')
       // ctx.throw(422, err.message)
+      this.handleError(ctx, err)
+    }
+  }
+
+  async getReport (ctx) {
+    try {
+      const report = await this.useCases.metrics.compileReport()
+      console.log('report: ', report)
+
+      ctx.body = report
+    } catch (err) {
+      wlogger.error('Error in ipfs/controller.js/getReport(): ')
       this.handleError(ctx, err)
     }
   }
