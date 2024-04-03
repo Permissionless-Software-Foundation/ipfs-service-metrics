@@ -69,6 +69,9 @@ class MetricUseCases {
   // Get a list of all IPFS nodes runing the ipfs-file-pin-service.
   async getFilePinServices () {
     try {
+      const thisNode = this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode
+      console.log(`thisNode: ${JSON.stringify(thisNode, null, 2)}`)
+
       const peerData =
         this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode.peerData
       // console.log('peerData: ', JSON.stringify(peerData, null, 2))
