@@ -26,7 +26,7 @@ services:
     links:
       - mongo-psf-metrics
     ports:
-      #- '5010:5010' # <host port>:<container port>
+      - '5025:5025' # <host port>:<container port>
       - '4021:4021'
       - '4023:4023'
     volumes:
