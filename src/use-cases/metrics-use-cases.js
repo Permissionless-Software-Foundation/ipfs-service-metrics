@@ -40,7 +40,7 @@ class MetricUseCases {
       // console.log('peerData: ', JSON.stringify(peerData, null, 2))
 
       // Filter the peers so that only those advertising a wallet service are left.
-      const walletServices = peerData.filter(x => x.data.jsonLd.protocol === 'ipfs-bch-wallet-service')
+      const walletServices = peerData.filter(x => x.data.jsonLd.protocol === 'ipfs-bch-wallet-service' || x.data.jsonLd.protocol === 'ipfs-bch-wallet-consumer')
       // console.log('walletServices: ', JSON.stringify(walletServices, null, 2))
 
       const walletPeers = []
