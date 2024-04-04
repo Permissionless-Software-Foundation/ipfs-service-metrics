@@ -30,6 +30,7 @@ class MetricUseCases {
     this.getCashStackServices = this.getCashStackServices.bind(this)
     this.getFilePinServices = this.getFilePinServices.bind(this)
     this.compileReport = this.compileReport.bind(this)
+    this.getCircuitRelays = this.getCircuitRelays.bind(this)
   }
 
   // Get a list of all IPFS nodes running the ipfs-bch-wallet-service.
@@ -103,6 +104,43 @@ class MetricUseCases {
     }
   }
 
+  // Get a list of all IPFS nodes running as a V2 Circuit Relay
+  async getCircuitRelays () {
+    try {
+      const thisNode = this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode
+      console.log(`thisNode: ${JSON.stringify(thisNode, null, 2)}`)
+
+      const peerData =
+        this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode.peerData
+      // console.log('peerData: ', JSON.stringify(peerData, null, 2))
+
+      // Filter the peers so that only the ones advertising file pinning service are left.
+      const crNodes = peerData.filter(x => x.data.isCircuitRelay === true)
+      // console.log('crNodes: ', JSON.stringify(crNodes, null, 2))
+
+      const crPeers = []
+      for (let i = 0; i < crNodes.length; i++) {
+        const thisNode = crNodes[i]
+
+        // Create a summary object of the peer.
+        const thisPeer = {
+          name: thisNode.data.jsonLd.name,
+          protocol: thisNode.data.jsonLd.protocol,
+          version: thisNode.data.jsonLd.version,
+          encryptPubKey: thisNode.data.encryptPubKey,
+          ipfsId: thisNode.data.jsonLd.identifier,
+          multiaddr: thisNode.multiaddr
+        }
+        crPeers.push(thisPeer)
+      }
+
+      return crPeers
+    } catch (err) {
+      console.error('Error in getCircuitRelays(): ', err)
+      // Do not throw error. This is a top-level function.
+    }
+  }
+
   // This is a macro function. It orchestrates many of the subfunctions in this
   // library. It returns a metrics report as a JSON object. That object can then
   // be published to IPFS using a Pin Claim.
@@ -116,13 +154,16 @@ class MetricUseCases {
       const pinPeers = await this.getFilePinServices()
       // console.log('pinPeers: ', pinPeers)
 
+      const crPeers = await this.getCircuitRelays()
+
       const now = new Date()
 
       return {
         metricsVersion: this.config.version,
         createdAt: now.toISOString(),
         walletPeers,
-        pinPeers
+        pinPeers,
+        circuitRelays: crPeers
       }
     } catch (err) {
       console.error('Error in compileReport()')
