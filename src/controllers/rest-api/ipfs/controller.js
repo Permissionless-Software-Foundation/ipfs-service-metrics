@@ -41,10 +41,10 @@ class IpfsRESTControllerLib {
    * @api {get} /ipfs Get status on IPFS infrastructure
    * @apiPermission public
    * @apiName GetIpfsStatus
-   * @apiGroup REST BCH
+   * @apiGroup REST IPFS
    *
    * @apiExample Example usage:
-   * curl -H "Content-Type: application/json" -X GET localhost:5001/ipfs
+   * curl -H "Content-Type: application/json" -X GET localhost:5020/ipfs
    *
    */
   async getStatus (ctx) {
@@ -108,10 +108,10 @@ class IpfsRESTControllerLib {
    * @api {get} /ipfs/node Get a copy of the thisNode object from helia-coord
    * @apiPermission public
    * @apiName GetThisNode
-   * @apiGroup REST BCH
+   * @apiGroup REST IPFS
    *
    * @apiExample Example usage:
-   * curl -H "Content-Type: application/json" -X GET localhost:5001/ipfs/node
+   * curl -H "Content-Type: application/json" -X GET localhost:5020/ipfs/node
    *
    */
   async getThisNode (ctx) {
@@ -126,6 +126,16 @@ class IpfsRESTControllerLib {
     }
   }
 
+  /**
+   * @api {get} /ipfs/metrics Generate a metrics report
+   * @apiPermission public
+   * @apiName GetMetrics
+   * @apiGroup REST IPFS
+   *
+   * @apiExample Example usage:
+   * curl -H "Content-Type: application/json" -X GET localhost:5020/ipfs/metrics
+   *
+   */
   async getReport (ctx) {
     try {
       const report = await this.useCases.metrics.compileReport()

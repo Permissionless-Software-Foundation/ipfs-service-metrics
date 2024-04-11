@@ -28,6 +28,7 @@ class MetricUseCases {
 
     // Bind 'this' object to all subfunctions
     this.getCashStackServices = this.getCashStackServices.bind(this)
+    this.getConsumerNodes = this.getConsumerNodes.bind(this)
     this.getFilePinServices = this.getFilePinServices.bind(this)
     this.compileReport = this.compileReport.bind(this)
     this.getCircuitRelays = this.getCircuitRelays.bind(this)
@@ -41,7 +42,7 @@ class MetricUseCases {
       // console.log('peerData: ', JSON.stringify(peerData, null, 2))
 
       // Filter the peers so that only those advertising a wallet service are left.
-      const walletServices = peerData.filter(x => x.data.jsonLd.protocol === 'ipfs-bch-wallet-service' || x.data.jsonLd.protocol === 'ipfs-bch-wallet-consumer')
+      const walletServices = peerData.filter(x => x.data.jsonLd.protocol === 'ipfs-bch-wallet-service')
       // console.log('walletServices: ', JSON.stringify(walletServices, null, 2))
 
       const walletPeers = []
@@ -63,6 +64,40 @@ class MetricUseCases {
       return walletPeers
     } catch (err) {
       console.error('Error in getCashStackServices(): ', err)
+      // Do not throw error. This is a top-level function.
+    }
+  }
+
+  // Get a list of all IPFS nodes running the ipfs-bch-wallet-consumer
+  async getConsumerNodes () {
+    try {
+      const peerData =
+        this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode.peerData
+      // console.log('peerData: ', JSON.stringify(peerData, null, 2))
+
+      // Filter the peers so that only those advertising a wallet service are left.
+      const consumers = peerData.filter(x => x.data.jsonLd.protocol === 'ipfs-bch-wallet-consumer')
+      // console.log('consumers: ', JSON.stringify(consumers, null, 2))
+
+      const consumerPeers = []
+      for (let i = 0; i < consumers.length; i++) {
+        const thisConsumer = consumers[i]
+
+        // Create a summary object of the peer.
+        const thisPeer = {
+          name: thisConsumer.data.jsonLd.name,
+          protocol: thisConsumer.data.jsonLd.protocol,
+          version: thisConsumer.data.jsonLd.version,
+          encryptPubKey: thisConsumer.data.encryptPubKey,
+          ipfsId: thisConsumer.data.jsonLd.identifier,
+          multiaddr: thisConsumer.multiaddr
+        }
+        consumerPeers.push(thisPeer)
+      }
+
+      return consumerPeers
+    } catch (err) {
+      console.error('Error in getConsumerNodes(): ', err)
       // Do not throw error. This is a top-level function.
     }
   }
@@ -150,6 +185,9 @@ class MetricUseCases {
       const walletPeers = await this.getCashStackServices()
       // console.log('walletPeers: ', walletPeers)
 
+      // Get all the nodes running ipfs-bch-wallet-consumer
+      const consumerPeers = await this.getConsumerNodes()
+
       // Get all the nodes providing File Pin services
       const pinPeers = await this.getFilePinServices()
       // console.log('pinPeers: ', pinPeers)
@@ -162,6 +200,7 @@ class MetricUseCases {
         metricsVersion: this.config.version,
         createdAt: now.toISOString(),
         walletPeers,
+        consumerPeers,
         pinPeers,
         circuitRelays: crPeers
       }
