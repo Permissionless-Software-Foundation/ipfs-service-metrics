@@ -138,7 +138,7 @@ class IpfsRESTControllerLib {
    */
   async getReport (ctx) {
     try {
-      const report = await this.useCases.metrics.compileReport()
+      const report = await this.useCases.metrics.compileInitialReport()
       console.log('report: ', report)
 
       ctx.body = report

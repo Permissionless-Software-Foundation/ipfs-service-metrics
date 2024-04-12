@@ -30,6 +30,7 @@ class MetricUseCases {
     this.getCashStackServices = this.getCashStackServices.bind(this)
     this.getConsumerNodes = this.getConsumerNodes.bind(this)
     this.getFilePinServices = this.getFilePinServices.bind(this)
+    this.compileInitialReport = this.compileInitialReport.bind(this)
     this.compileReport = this.compileReport.bind(this)
     this.getCircuitRelays = this.getCircuitRelays.bind(this)
   }
@@ -105,8 +106,8 @@ class MetricUseCases {
   // Get a list of all IPFS nodes runing the ipfs-file-pin-service.
   async getFilePinServices () {
     try {
-      const thisNode = this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode
-      console.log(`thisNode: ${JSON.stringify(thisNode, null, 2)}`)
+      // const thisNode = this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode
+      // console.log(`thisNode: ${JSON.stringify(thisNode, null, 2)}`)
 
       const peerData =
         this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode.peerData
@@ -142,8 +143,8 @@ class MetricUseCases {
   // Get a list of all IPFS nodes running as a V2 Circuit Relay
   async getCircuitRelays () {
     try {
-      const thisNode = this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode
-      console.log(`thisNode: ${JSON.stringify(thisNode, null, 2)}`)
+      // const thisNode = this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode
+      // console.log(`thisNode: ${JSON.stringify(thisNode, null, 2)}`)
 
       const peerData =
         this.adapters.ipfs.ipfsCoordAdapter.ipfsCoord.thisNode.peerData
@@ -176,10 +177,10 @@ class MetricUseCases {
     }
   }
 
-  // This is a macro function. It orchestrates many of the subfunctions in this
-  // library. It returns a metrics report as a JSON object. That object can then
-  // be published to IPFS using a Pin Claim.
-  async compileReport (inObj = {}) {
+  // Compile an initial report, based on the state of this IPFS node and the
+  // peers it can see. This is a quick action that prepares for interrogation
+  // of the connected nodes.
+  async compileInitialReport (inObj = {}) {
     try {
       // Get all the nodes providing CashStack web3 services
       const walletPeers = await this.getCashStackServices()
@@ -204,6 +205,21 @@ class MetricUseCases {
         pinPeers,
         circuitRelays: crPeers
       }
+    } catch (err) {
+      console.error('Error in compileInitialReport()')
+      throw err
+    }
+  }
+
+  // This is a macro function. It orchestrates many of the subfunctions in this
+  // library. It returns a metrics report as a JSON object. That object can then
+  // be published to IPFS using a Pin Claim.
+  async compileReport (inObj = {}) {
+    try {
+      // Generate an initial report based on the state of the IPFS node.
+      const initialReport = await this.compileInitialReport(inObj)
+
+      return initialReport
     } catch (err) {
       console.error('Error in compileReport()')
       throw err
