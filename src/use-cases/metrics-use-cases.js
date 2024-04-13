@@ -33,6 +33,8 @@ class MetricUseCases {
     this.compileInitialReport = this.compileInitialReport.bind(this)
     this.compileReport = this.compileReport.bind(this)
     this.getCircuitRelays = this.getCircuitRelays.bind(this)
+    this.initPinContent = this.initPinContent.bind(this)
+    this.interrogatePinServices = this.interrogatePinServices.bind(this)
   }
 
   // Get a list of all IPFS nodes running the ipfs-bch-wallet-service.
@@ -91,7 +93,8 @@ class MetricUseCases {
           version: thisConsumer.data.jsonLd.version,
           encryptPubKey: thisConsumer.data.encryptPubKey,
           ipfsId: thisConsumer.data.jsonLd.identifier,
-          multiaddr: thisConsumer.multiaddr
+          multiaddr: thisConsumer.multiaddr,
+          web2Api: thisConsumer.data.jsonLd.web2Api
         }
         consumerPeers.push(thisPeer)
       }
@@ -219,12 +222,55 @@ class MetricUseCases {
       // Generate an initial report based on the state of the IPFS node.
       const initialReport = await this.compileInitialReport(inObj)
 
+      await this.interrogateConsumers({ initialReport })
+
+      // await this.interrogatePinServices({ initialReport })
+
       return initialReport
     } catch (err) {
       console.error('Error in compileReport()')
       throw err
     }
   }
+
+  // async interrogateConsumers (inObj = {}) {
+  //   try {
+  //     const { initialReport } = inObj
+  //
+  //     // const { consumerPeers } = initialReport
+  //   } catch (err) {
+  //     console.error('Error in iterrogateConsuemrs()')
+  //     throw err
+  //   }
+  // }
+
+  // This function is run at startup. It waits until a Pin Service is connected
+  // to, then it request the most recent pinned content. It sets the most
+  // recent as the file to use for metric tests. This function retries with a
+  // delay until it is successful.
+  async initPinContent (inObj = {}) {
+    try {
+      this.callComplete = false
+
+      // const initPinContentHandle = setInterval(async function () {
+      //   if()
+      // }, 60000 * 2)
+    } catch (err) {
+      console.error('Error in initPinContent()')
+      throw err
+    }
+  }
+
+  // For each wallet service, download a recently pinned piece of conent to test
+  // that it's operating correctly.
+  // async interrogatePinServices (inObj = {}) {
+  //   try {
+  //
+  //   } catch (err) {
+  //     console.error('Error in interrogatePinServices()')
+  //     throw err
+  //   }
+  // }
 
   // Publish the JSON report to IPFS and generate a Pin Claim on the blockchain.
   // Example code that inspired this function:
