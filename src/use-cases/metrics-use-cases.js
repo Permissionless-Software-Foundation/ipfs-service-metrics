@@ -6,6 +6,7 @@
 
 // Global npm libraries
 import PSFFPP from 'psffpp'
+import axios from 'axios'
 
 // Local libraries
 import wlogger from '../adapters/wlogger.js'
@@ -25,6 +26,7 @@ class MetricUseCases {
     this.wlogger = wlogger
     this.config = config
     this.PSFFPP = PSFFPP
+    this.axios = axios
 
     // Bind 'this' object to all subfunctions
     this.getCashStackServices = this.getCashStackServices.bind(this)
@@ -34,7 +36,11 @@ class MetricUseCases {
     this.compileReport = this.compileReport.bind(this)
     this.getCircuitRelays = this.getCircuitRelays.bind(this)
     this.initPinContent = this.initPinContent.bind(this)
-    this.interrogatePinServices = this.interrogatePinServices.bind(this)
+    this.interrogateConsumers = this.interrogateConsumers.bind(this)
+    // this.interrogatePinServices = this.interrogatePinServices.bind(this)
+
+    // State
+    this.targetCid = null // placeholder
   }
 
   // Get a list of all IPFS nodes running the ipfs-bch-wallet-service.
@@ -203,10 +209,12 @@ class MetricUseCases {
       return {
         metricsVersion: this.config.version,
         createdAt: now.toISOString(),
-        walletPeers,
-        consumerPeers,
-        pinPeers,
-        circuitRelays: crPeers
+        ipfsPeers: {
+          walletPeers,
+          consumerPeers,
+          pinPeers,
+          circuitRelays: crPeers
+        }
       }
     } catch (err) {
       console.error('Error in compileInitialReport()')
@@ -222,7 +230,8 @@ class MetricUseCases {
       // Generate an initial report based on the state of the IPFS node.
       const initialReport = await this.compileInitialReport(inObj)
 
-      await this.interrogateConsumers({ initialReport })
+      const consumerReport = await this.interrogateConsumers({ initialReport })
+      initialReport.consumerReport = consumerReport
 
       // await this.interrogatePinServices({ initialReport })
 
@@ -233,16 +242,66 @@ class MetricUseCases {
     }
   }
 
-  // async interrogateConsumers (inObj = {}) {
-  //   try {
-  //     const { initialReport } = inObj
-  //
-  //     // const { consumerPeers } = initialReport
-  //   } catch (err) {
-  //     console.error('Error in iterrogateConsuemrs()')
-  //     throw err
-  //   }
-  // }
+  async interrogateConsumers (inObj = {}) {
+    try {
+      // Get a list of consumer nodes
+      const { initialReport } = inObj
+      const { consumerPeers } = initialReport.ipfsPeers
+
+      // Return an empty array if there are no known consumer peers.
+      if (!consumerPeers || !consumerPeers.length) return []
+
+      const consumerReport = []
+
+      for (let i = 0; i < consumerPeers.length; i++) {
+        const thisConsumer = consumerPeers[i]
+        const web2Api = thisConsumer.web2Api
+
+        // Skip this peer if it does not have a web2 API listed.
+        if (!web2Api) continue
+
+        // Get the IPFS ID of the file service this consumer is attached to.
+        const fileServiceResult = await this.axios.get(`${web2Api}/ipfs/service`)
+        const fileService = fileServiceResult.data.selectedIpfsFileProvider
+        console.log('fileService: ', fileService)
+        thisConsumer.fileService = fileService
+
+        // Get the IPFS ID of the wallet service this consumer is attached to.
+        const bchServiceResult = await this.axios.get(`${web2Api}/bch/service`)
+        const bchService = bchServiceResult.data.selectedServiceProvider
+        console.log('bchService: ', bchService)
+        thisConsumer.bchService = bchService
+
+        // Get data on the files pinned by the pinning services this consumer
+        // peer is connected to.
+        const url = `${web2Api}/ipfs/pins`
+        console.log('url: ', url)
+        const pinsResult = await this.axios.get(url)
+        const fileData = pinsResult.data
+        console.log(`fileData for ${web2Api}: `, JSON.stringify(fileData, null, 2))
+
+        if (i === 0) {
+          this.targetCid = fileData.pins.pins[1].cid
+
+          thisConsumer.targetCid = this.targetCid
+          thisConsumer.targetCidIsValid = fileData.pins.pins[1].validClaim
+          thisConsumer.targetCidIsPinned = fileData.pins.pins[1].dataPinned
+        } else {
+          const target = fileData.pins.pins.filter(x => x.cid === this.targetCid)
+          thisConsumer.targetCid = this.targetCid
+          thisConsumer.targetCidIsValid = target[0].validClaim
+          thisConsumer.targetCidIsPinned = target[0].dataPinned
+        }
+
+        consumerReport.push(thisConsumer)
+      }
+
+      return consumerReport
+    } catch (err) {
+      console.error('Error in interrogateConsumers()', err)
+      throw err
+    }
+  }
 
   // This function is run at startup. It waits until a Pin Service is connected
   // to, then it request the most recent pinned content. It sets the most
