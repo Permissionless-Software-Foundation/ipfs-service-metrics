@@ -37,6 +37,7 @@
     "@libp2p/webrtc": "4.0.17",
     "axios": "0.27.2",
     "bch-message-lib": "2.2.1",
+    "bch-token-sweep": "2.2.1",
     "bcryptjs": "2.4.3",
     "blockstore-fs": "1.1.8",
     "datastore-fs": "9.1.6",

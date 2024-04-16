@@ -7,6 +7,7 @@
 // Global npm libraries
 import PSFFPP from 'psffpp'
 import axios from 'axios'
+import BchTokenSweep from 'bch-token-sweep/index.js'
 
 // Local libraries
 import wlogger from '../adapters/wlogger.js'
@@ -27,6 +28,7 @@ class MetricUseCases {
     this.config = config
     this.PSFFPP = PSFFPP
     this.axios = axios
+    this.BchTokenSweep = BchTokenSweep
 
     // Bind 'this' object to all subfunctions
     this.getCashStackServices = this.getCashStackServices.bind(this)
@@ -230,14 +232,32 @@ class MetricUseCases {
       // Generate an initial report based on the state of the IPFS node.
       const initialReport = await this.compileInitialReport(inObj)
 
-      const consumerReport = await this.interrogateConsumers({ initialReport })
+      // Try to sweep the test wallet to make sure its balance is zero.
+      try {
+        await this.sweepTestWallet()
+      } catch(err) {
+        console.log(`Error trying to sweep test wallet. Continuing metrics test.`)
+      }
+
+      let expectedBalance = 0
+      try {
+        expectedBalance = await this.loadTestWallet()
+      } catch(err) {
+        console.error('Error trying to send PSF tokens to test wallet. Can not continue test. Error: ', err)
+        return initialReport
+      }
+
+      // Wait a few seconds to let the transaction propegate across the network.
+      await this.adapters.wallet.bchWallet.bchjs.Util.sleep(5000)
+
+      const consumerReport = await this.interrogateConsumers({ initialReport, expectedBalance })
       initialReport.consumerReport = consumerReport
 
       // await this.interrogatePinServices({ initialReport })
 
       return initialReport
     } catch (err) {
-      console.error('Error in compileReport()')
+      console.error('Error in compileReport(): ', err)
       throw err
     }
   }
@@ -245,7 +265,7 @@ class MetricUseCases {
   async interrogateConsumers (inObj = {}) {
     try {
       // Get a list of consumer nodes
-      const { initialReport } = inObj
+      const { initialReport, expectedBalance } = inObj
       const { consumerPeers } = initialReport.ipfsPeers
 
       // Return an empty array if there are no known consumer peers.
@@ -274,7 +294,7 @@ class MetricUseCases {
 
         // Get data on the files pinned by the pinning services this consumer
         // peer is connected to.
-        const url = `${web2Api}/ipfs/pins`
+        let url = `${web2Api}/ipfs/pins`
         console.log('url: ', url)
         const pinsResult = await this.axios.get(url)
         const fileData = pinsResult.data
@@ -291,6 +311,30 @@ class MetricUseCases {
           thisConsumer.targetCid = this.targetCid
           thisConsumer.targetCidIsValid = target[0].validClaim
           thisConsumer.targetCidIsPinned = target[0].dataPinned
+        }
+
+        // Get the address for the test wallet
+        const wallet = this.adapters.wallet.bchWallet
+        const keyPair = await wallet.getKeyPair(1)
+        const address = keyPair.cashAddress
+
+
+
+        url = `${web2Api}/bch/utxos`
+        const bchResult = await this.axios.post(url, {address})
+        const utxos = bchResult.data
+        console.log(`utxos: `, JSON.stringify(utxos, null, 2))
+
+        thisConsumer.walletServiceWorking = false
+
+        if(utxos[0].slpUtxos) {
+          const tokenQty = Number(utxos[0].slpUtxos.type1.tokens[0].qtyStr)
+          console.log(`tokenQty: ${tokenQty}`)
+
+
+          if(tokenQty === expectedBalance) {
+            thisConsumer.walletServiceWorking = true
+          }
         }
 
         consumerReport.push(thisConsumer)
@@ -385,6 +429,78 @@ class MetricUseCases {
       }
     } catch (err) {
       console.error('Error in publishReport()')
+      throw err
+    }
+  }
+
+  // Load a random amount of PSF tokens to the test wallet at index 1 of the HD
+  // wallet.
+  async loadTestWallet() {
+    try {
+
+      const wallet = this.adapters.wallet.bchWallet
+
+      const keyPair = await wallet.getKeyPair(1)
+      console.log('keyPair: ', keyPair)
+      const address = keyPair.cashAddress
+
+      const balance = await wallet.getBalance()
+      console.log('balance: ', balance)
+      const tokens = await wallet.listTokens()
+      console.log('tokens: ', tokens)
+      // const bchAddr = wallet.walletInfo.cashAddress
+      // console.log('bchAddr: ', bchAddr)
+
+      const qty = wallet.bchjs.Util.floor8(Math.random()/1000)
+      console.log(`Sending ${qty} PSF tokens.`)
+
+      await wallet.initialize()
+      const receiver = {
+        address,
+        tokenId: '38e97c5d7d3585a2cbf3f9580c82ca33985f9cb0845d4dcce220cb709f9538b0',
+        qty
+      }
+      const txid = await wallet.sendTokens(receiver, 3)
+      console.log(`Sent ${qty} PSF tokens. TXID: ${txid}`)
+
+      return qty
+
+    } catch(err) {
+      console.error('Error in loadTestWallet()')
+      throw err
+    }
+  }
+
+  // Sweep any tokens or BCH from the test wallet at index 1 of the HD wallet.
+  async sweepTestWallet() {
+    try {
+      // Get key pair for receiving wallet (index 0)
+      const wallet = this.adapters.wallet.bchWallet
+      const walletWif = wallet.walletInfo.privateKey
+      const receiverAddr = wallet.walletInfo.cashAddress
+
+      // Get key pair for test wallet (index 1)
+      const keyPair = await wallet.getKeyPair(1)
+      const wif = keyPair.wif
+
+      // Instantiate the sweeper library.
+      const sweeper = new this.BchTokenSweep(
+        wif,
+        walletWif,
+        wallet
+      )
+      await sweeper.populateObjectFromNetwork()
+
+      // Generate the sweep transaction.
+      const hex = await sweeper.sweepTo(receiverAddr)
+
+      // Broadcast the transaction.
+      const txid = await wallet.broadcast({hex})
+      console.log(`Test wallet swept. TXID: ${txid}`)
+
+      return txid
+    } catch(err) {
+      console.error('Error in sweepTestWallet()')
       throw err
     }
   }
