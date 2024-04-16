@@ -235,14 +235,14 @@ class MetricUseCases {
       // Try to sweep the test wallet to make sure its balance is zero.
       try {
         await this.sweepTestWallet()
-      } catch(err) {
-        console.log(`Error trying to sweep test wallet. Continuing metrics test.`)
+      } catch (err) {
+        console.log('Error trying to sweep test wallet. Continuing metrics test.')
       }
 
       let expectedBalance = 0
       try {
         expectedBalance = await this.loadTestWallet()
-      } catch(err) {
+      } catch (err) {
         console.error('Error trying to send PSF tokens to test wallet. Can not continue test. Error: ', err)
         return initialReport
       }
@@ -318,21 +318,18 @@ class MetricUseCases {
         const keyPair = await wallet.getKeyPair(1)
         const address = keyPair.cashAddress
 
-
-
         url = `${web2Api}/bch/utxos`
-        const bchResult = await this.axios.post(url, {address})
+        const bchResult = await this.axios.post(url, { address })
         const utxos = bchResult.data
-        console.log(`utxos: `, JSON.stringify(utxos, null, 2))
+        console.log('utxos: ', JSON.stringify(utxos, null, 2))
 
         thisConsumer.walletServiceWorking = false
 
-        if(utxos[0].slpUtxos) {
+        if (utxos[0].slpUtxos) {
           const tokenQty = Number(utxos[0].slpUtxos.type1.tokens[0].qtyStr)
           console.log(`tokenQty: ${tokenQty}`)
 
-
-          if(tokenQty === expectedBalance) {
+          if (tokenQty === expectedBalance) {
             thisConsumer.walletServiceWorking = true
           }
         }
@@ -435,9 +432,8 @@ class MetricUseCases {
 
   // Load a random amount of PSF tokens to the test wallet at index 1 of the HD
   // wallet.
-  async loadTestWallet() {
+  async loadTestWallet () {
     try {
-
       const wallet = this.adapters.wallet.bchWallet
 
       const keyPair = await wallet.getKeyPair(1)
@@ -451,7 +447,7 @@ class MetricUseCases {
       // const bchAddr = wallet.walletInfo.cashAddress
       // console.log('bchAddr: ', bchAddr)
 
-      const qty = wallet.bchjs.Util.floor8(Math.random()/1000)
+      const qty = wallet.bchjs.Util.floor8(Math.random() / 1000)
       console.log(`Sending ${qty} PSF tokens.`)
 
       await wallet.initialize()
@@ -464,15 +460,14 @@ class MetricUseCases {
       console.log(`Sent ${qty} PSF tokens. TXID: ${txid}`)
 
       return qty
-
-    } catch(err) {
+    } catch (err) {
       console.error('Error in loadTestWallet()')
       throw err
     }
   }
 
   // Sweep any tokens or BCH from the test wallet at index 1 of the HD wallet.
-  async sweepTestWallet() {
+  async sweepTestWallet () {
     try {
       // Get key pair for receiving wallet (index 0)
       const wallet = this.adapters.wallet.bchWallet
@@ -495,11 +490,11 @@ class MetricUseCases {
       const hex = await sweeper.sweepTo(receiverAddr)
 
       // Broadcast the transaction.
-      const txid = await wallet.broadcast({hex})
+      const txid = await wallet.broadcast({ hex })
       console.log(`Test wallet swept. TXID: ${txid}`)
 
       return txid
-    } catch(err) {
+    } catch (err) {
       console.error('Error in sweepTestWallet()')
       throw err
     }
