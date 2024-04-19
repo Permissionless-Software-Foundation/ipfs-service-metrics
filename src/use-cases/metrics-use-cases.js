@@ -298,7 +298,7 @@ class MetricUseCases {
         console.log('url: ', url)
         const pinsResult = await this.axios.get(url)
         const fileData = pinsResult.data
-        console.log(`fileData for ${web2Api}: `, JSON.stringify(fileData, null, 2))
+        // console.log(`fileData for ${web2Api}: `, JSON.stringify(fileData, null, 2))
 
         if (fileData.success === false) {
           thisConsumer.targetCid = null
@@ -443,7 +443,7 @@ class MetricUseCases {
       const wallet = this.adapters.wallet.bchWallet
 
       const keyPair = await wallet.getKeyPair(1)
-      console.log('keyPair: ', keyPair)
+      // console.log('keyPair: ', keyPair)
       const address = keyPair.cashAddress
 
       const balance = await wallet.getBalance()
