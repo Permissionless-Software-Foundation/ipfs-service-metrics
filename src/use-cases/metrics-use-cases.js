@@ -300,17 +300,23 @@ class MetricUseCases {
         const fileData = pinsResult.data
         console.log(`fileData for ${web2Api}: `, JSON.stringify(fileData, null, 2))
 
-        if (i === 0) {
-          this.targetCid = fileData.pins.pins[1].cid
-
-          thisConsumer.targetCid = this.targetCid
-          thisConsumer.targetCidIsValid = fileData.pins.pins[1].validClaim
-          thisConsumer.targetCidIsPinned = fileData.pins.pins[1].dataPinned
+        if (fileData.success === false) {
+          thisConsumer.targetCid = null
+          thisConsumer.targetCidIsValid = false
+          thisConsumer.targetCidIsValid = false
         } else {
-          const target = fileData.pins.pins.filter(x => x.cid === this.targetCid)
-          thisConsumer.targetCid = this.targetCid
-          thisConsumer.targetCidIsValid = target[0].validClaim
-          thisConsumer.targetCidIsPinned = target[0].dataPinned
+          if (i === 0) {
+            this.targetCid = fileData.pins.pins[1].cid
+
+            thisConsumer.targetCid = this.targetCid
+            thisConsumer.targetCidIsValid = fileData.pins.pins[1].validClaim
+            thisConsumer.targetCidIsPinned = fileData.pins.pins[1].dataPinned
+          } else {
+            const target = fileData.pins.pins.filter(x => x.cid === this.targetCid)
+            thisConsumer.targetCid = this.targetCid
+            thisConsumer.targetCidIsValid = target[0].validClaim
+            thisConsumer.targetCidIsPinned = target[0].dataPinned
+          }
         }
 
         // Get the address for the test wallet
