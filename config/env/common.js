@@ -149,5 +149,8 @@ export default {
 
   // END IPFS CONFIGURATION
 
-  version
+  version,
+
+  // Time between publishing metrics reports in milliseconds. Default is 24 hours.
+  metricsPeriod: process.env.METRICS_PERIOD ? parseInt(process.env.METRICS_PERIOD) : 60000 * 60 * 24
 }

@@ -9,7 +9,7 @@ import { Write } from 'p2wdb'
 // Local libraries
 import config from '../../config/index.js'
 
-const METRICS_PERIOD = 60000 * 60 * 24
+// const METRICS_PERIOD = 60000 * 60 * 24
 // const METRICS_PERIOD = 60000 * 60 * 12
 
 class TimerControllers {
@@ -47,7 +47,7 @@ class TimerControllers {
     // Any new timer control functions can be added here. They will be started
     // when the server starts.
     // this.optimizeWalletHandle = setInterval(this.exampleTimerFunc, 60000 * 10)
-    this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
+    this.handleMetricsHandle = setInterval(this.handleMetrics, this.config.metricsPeriod)
 
     return true
   }
@@ -80,9 +80,12 @@ class TimerControllers {
       // const crMetrics = await this.gatherCRMetrics()
       // console.log('crMetrics: ', crMetrics)
 
+      const now = new Date()
+      console.log(`Timer Controller generating and publishing a new metrics report at ${now.toLocaleString()}`)
+
       // Generate a JSON report of network metrics.
       const report = await this.useCases.metrics.compileReport()
-      console.log('report: ', report)
+      // console.log('report: ', report)
 
       // Publish the report to IPFS and generate a Pin Claim.
       await this.useCases.metrics.publishReport({ report })
@@ -91,12 +94,12 @@ class TimerControllers {
       // console.log('hash: ', hash)
 
       // Renable interval
-      this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
+      this.handleMetricsHandle = setInterval(this.handleMetrics, this.config.metricsPeriod)
     } catch (err) {
       console.error('Error in handleMetrics(): ', err)
       // Do not throw error. This is a top-level function.
 
-      this.handleMetricsHandle = setInterval(this.handleMetrics, METRICS_PERIOD)
+      this.handleMetricsHandle = setInterval(this.handleMetrics, this.config.metricsPeriod)
     }
   }
 
