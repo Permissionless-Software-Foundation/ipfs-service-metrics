@@ -312,10 +312,16 @@ class MetricUseCases {
             thisConsumer.targetCidIsValid = fileData.pins.pins[1].validClaim
             thisConsumer.targetCidIsPinned = fileData.pins.pins[1].dataPinned
           } else {
-            const target = fileData.pins.pins.filter(x => x.cid === this.targetCid)
             thisConsumer.targetCid = this.targetCid
-            thisConsumer.targetCidIsValid = target[0].validClaim
-            thisConsumer.targetCidIsPinned = target[0].dataPinned
+
+            const target = fileData.pins.pins.filter(x => x.cid === this.targetCid)
+            if (!target[0]) {
+              thisConsumer.targetCidIsValid = null
+              thisConsumer.targetCidIsPinned = null
+            } else {
+              thisConsumer.targetCidIsValid = target[0].validClaim
+              thisConsumer.targetCidIsPinned = target[0].dataPinned
+            }
           }
         }
 
