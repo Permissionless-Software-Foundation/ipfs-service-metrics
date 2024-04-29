@@ -248,7 +248,9 @@ class MetricUseCases {
       }
 
       // Wait a few seconds to let the transaction propegate across the network.
-      await this.adapters.wallet.bchWallet.bchjs.Util.sleep(5000)
+      const timeToWait = 15000
+      console.log(`Waiting ${timeToWait / 1000} seconds before checking balance...`)
+      await this.adapters.wallet.bchWallet.bchjs.Util.sleep(timeToWait)
 
       const consumerReport = await this.interrogateConsumers({ initialReport, expectedBalance })
       initialReport.consumerReport = consumerReport
@@ -339,7 +341,7 @@ class MetricUseCases {
 
         if (utxos[0].slpUtxos) {
           if (!utxos[0].slpUtxos.type1.tokens.length) {
-            throw new Error('No SLP token UTXOs found. Indexer may have fallen behind.')
+            throw new Error('No SLP token UTXOs found. Indexer may have fallen behind, or more time may be needed before balance registers.')
           }
 
           const tokenQty = Number(utxos[0].slpUtxos.type1.tokens[0].qtyStr)
