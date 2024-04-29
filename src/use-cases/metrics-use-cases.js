@@ -248,8 +248,8 @@ class MetricUseCases {
       }
 
       // Wait a few seconds to let the transaction propegate across the network.
-      const timeToWait = 15000
-      console.log(`Waiting ${timeToWait / 1000} seconds before checking balance...`)
+      const timeToWait = 60000
+      console.log(`Waiting ${timeToWait / 1000} seconds before checking balance on remote systems...`)
       await this.adapters.wallet.bchWallet.bchjs.Util.sleep(timeToWait)
 
       const consumerReport = await this.interrogateConsumers({ initialReport, expectedBalance })
