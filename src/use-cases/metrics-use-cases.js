@@ -338,8 +338,8 @@ class MetricUseCases {
         thisConsumer.walletServiceWorking = false
 
         if (utxos[0].slpUtxos) {
-          if(!utxos[0].slpUtxos.type1.tokens.length) {
-            throw new Error(`No SLP token UTXOs found. Indexer may have fallen behind.`)
+          if (!utxos[0].slpUtxos.type1.tokens.length) {
+            throw new Error('No SLP token UTXOs found. Indexer may have fallen behind.')
           }
 
           const tokenQty = Number(utxos[0].slpUtxos.type1.tokens[0].qtyStr)
