@@ -34,16 +34,18 @@ class IpfsRESTControllerLib {
     this.handleError = this.handleError.bind(this)
     this.connect = this.connect.bind(this)
     this.getThisNode = this.getThisNode.bind(this)
+    this.getReport = this.getReport.bind(this)
+    this.testReport = this.testReport.bind(this)
   }
 
   /**
    * @api {get} /ipfs Get status on IPFS infrastructure
    * @apiPermission public
    * @apiName GetIpfsStatus
-   * @apiGroup REST BCH
+   * @apiGroup REST IPFS
    *
    * @apiExample Example usage:
-   * curl -H "Content-Type: application/json" -X GET localhost:5001/ipfs
+   * curl -H "Content-Type: application/json" -X GET localhost:5020/ipfs
    *
    */
   async getStatus (ctx) {
@@ -107,10 +109,10 @@ class IpfsRESTControllerLib {
    * @api {get} /ipfs/node Get a copy of the thisNode object from helia-coord
    * @apiPermission public
    * @apiName GetThisNode
-   * @apiGroup REST BCH
+   * @apiGroup REST IPFS
    *
    * @apiExample Example usage:
-   * curl -H "Content-Type: application/json" -X GET localhost:5001/ipfs/node
+   * curl -H "Content-Type: application/json" -X GET localhost:5020/ipfs/node
    *
    */
   async getThisNode (ctx) {
@@ -121,6 +123,40 @@ class IpfsRESTControllerLib {
     } catch (err) {
       wlogger.error('Error in ipfs/controller.js/getThisNode(): ')
       // ctx.throw(422, err.message)
+      this.handleError(ctx, err)
+    }
+  }
+
+  /**
+   * @api {get} /ipfs/metrics Generate a metrics report
+   * @apiPermission public
+   * @apiName GetMetrics
+   * @apiGroup REST IPFS
+   *
+   * @apiExample Example usage:
+   * curl -H "Content-Type: application/json" -X GET localhost:5020/ipfs/metrics
+   *
+   */
+  async getReport (ctx) {
+    try {
+      const report = await this.useCases.metrics.compileInitialReport()
+      // console.log('report: ', report)
+
+      ctx.body = report
+    } catch (err) {
+      wlogger.error('Error in ipfs/controller.js/getReport(): ')
+      this.handleError(ctx, err)
+    }
+  }
+
+  async testReport (ctx) {
+    try {
+      const report = await this.useCases.metrics.compileReport()
+      console.log('report: ', report)
+
+      ctx.body = report
+    } catch (err) {
+      wlogger.error('Error in ipfs/controller.js/getReport(): ')
       this.handleError(ctx, err)
     }
   }

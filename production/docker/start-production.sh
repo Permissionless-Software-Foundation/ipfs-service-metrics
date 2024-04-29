@@ -16,24 +16,21 @@ export COORD_NAME=psf-service-metrics
 # and you must forward that subdomain to the IPFS_WS_PORT.
 #export CR_DOMAIN=subdomain.yourdomain.com
 
-# Debug level. 0 = minimal info. 2 = max info.
-export DEBUG_LEVEL=0
-
 # END: Optional configuration settings
 
 
 # Production database connection string.
-export DBURL=mongodb://172.17.0.1:5555/ipfs-service-prod
+export DBURL=mongodb://172.17.0.1:5565/ipfs-service-prod
 
 # Configure REST API port
-export PORT=5010
+export PORT=5025
 
 # Production settings using external go-ipfs node.
 export SVC_ENV=prod
 export IPFS_HOST=172.17.0.1
 export IPFS_API_PORT=5001
-export IPFS_TCP_PORT=4001
-export IPFS_WS_PORT=4003
+export IPFS_TCP_PORT=4021
+export IPFS_WS_PORT=4023
 
 # Set the debug level for helia-coord. 0-3.
 # 0 = no debug logs. 3 = maximum debug logs.

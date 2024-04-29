@@ -20,14 +20,21 @@ class Wallet {
 
     // Bind 'this' object to all subfunctions
     this.instanceWalletWithoutInitialization = this.instanceWalletWithoutInitialization.bind(this)
+
+    // state
+    this.advancedConfig = {}
   }
 
   // This is used for initializing the wallet, without waiting to update the wallet
   // UTXOs from the blockchain.
   // This is useful when the wallet is simply needed to make calls to the blockchain,
   // and there is no need to hydrate it with UTXO data.
-  async instanceWalletWithoutInitialization (walletData = {}, advancedConfig = {}) {
+  async instanceWalletWithoutInitialization (walletData = {}, advancedConfig) {
     try {
+      // console.log('instanceWalletWithoutInitialization() walletData: ', walletData)
+
+      if (!advancedConfig) advancedConfig = this.advancedConfig
+
       // Use the apiToken from the config settings, if one is not passed-in at
       // run-time.
       if (!advancedConfig.apiToken) {
@@ -49,7 +56,10 @@ class Wallet {
         advancedConfig.restURL = this.config.apiServer
       }
 
-      console.log('advancedConfig setting when creating wallet: ', advancedConfig)
+      // Save the advancedConfig object to state
+      this.advancedConfig = advancedConfig
+
+      // console.log('advancedConfig setting when creating wallet: ', advancedConfig)
 
       // Instantiate minimal-slp-wallet.
       if (walletData.mnemonic) {
@@ -96,8 +106,8 @@ class Wallet {
 
       // Try to open the wallet.json file.
       try {
-        // console.log('this.config.walletFile: ', this.config.walletFile)
         walletData = await this.jsonFiles.readJSON(this.config.walletFile)
+        walletData = walletData.wallet
       } catch (err) {
         // Create a new wallet file if one does not already exist.
         console.log('Wallet file not found. Creating new wallet.json file.')
@@ -112,7 +122,7 @@ class Wallet {
         walletData.nextAddress = 1
 
         // Write the wallet data to the JSON file.
-        await this.jsonFiles.writeJSON(walletData, this.config.walletFile)
+        await this.jsonFiles.writeJSON({ wallet: walletData }, this.config.walletFile)
       }
 
       // console.log('walletData: ', walletData)
@@ -126,8 +136,12 @@ class Wallet {
   // Create an instance of minimal-slp-wallet. Same as
   // instanceWalletWithoutInitialization(), but waits for the wallet to initialize
   // its UTXOs (wallet balance and tokens).
-  async instanceWallet (walletData = {}, advancedConfig = {}) {
+  async instanceWallet (walletData = {}, advancedConfig) {
     try {
+      // console.log('instanceWallet() walletData: ', walletData)
+
+      if (!advancedConfig) advancedConfig = this.advancedConfig
+
       // Instance the wallet without initialization.
       await this.instanceWalletWithoutInitialization(walletData, advancedConfig)
 
@@ -149,13 +163,18 @@ class Wallet {
   async incrementNextAddress () {
     try {
       const walletData = await this.openWallet()
-      // console.log('original walletdata: ', walletData)
+
+      await this.instanceWalletWithoutInitialization(walletData)
+
       walletData.nextAddress++
       // console.log('walletData finish: ', walletData)
-      await this.jsonFiles.writeJSON(walletData, this.WALLET_FILE)
+
+      await this.jsonFiles.writeJSON({ wallet: walletData }, this.config.walletFile)
+
       // Update the working instance of the wallet.
       this.bchWallet.walletInfo.nextAddress++
       // console.log('this.bchWallet.walletInfo: ', this.bchWallet.walletInfo)
+
       return walletData.nextAddress
     } catch (err) {
       console.error('Error in incrementNextAddress()')
@@ -173,16 +192,21 @@ class Wallet {
         // Increment the HD index and generate a new key pair.
         hdIndex = await this.incrementNextAddress()
       }
+
       const mnemonic = this.bchWallet.walletInfo.mnemonic
+
       // root seed buffer
       const rootSeed = await this.bchWallet.bchjs.Mnemonic.toSeed(mnemonic)
       const masterHDNode = this.bchWallet.bchjs.HDNode.fromSeed(rootSeed)
+
       // HDNode of BIP44 account
       // const account = this.bchWallet.bchjs.HDNode.derivePath(masterHDNode, "m/44'/245'/0'")
       const childNode = masterHDNode.derivePath(`m/44'/245'/0'/0/${hdIndex}`)
       const cashAddress = this.bchWallet.bchjs.HDNode.toCashAddress(childNode)
       console.log('Generating a new key pair for cashAddress: ', cashAddress)
+
       const wif = this.bchWallet.bchjs.HDNode.toWIF(childNode)
+
       const outObj = {
         cashAddress,
         wif,

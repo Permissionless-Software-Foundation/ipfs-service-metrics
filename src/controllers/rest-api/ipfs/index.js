@@ -56,6 +56,8 @@ class IpfsRouter {
     this.router.post('/relays', this.ipfsRESTController.getRelays)
     this.router.post('/connect', this.ipfsRESTController.connect)
     this.router.get('/node', this.ipfsRESTController.getThisNode)
+    this.router.get('/metrics', this.ipfsRESTController.getReport)
+    this.router.get('/test', this.ipfsRESTController.testReport)
 
     // Attach the Controller routes to the Koa app.
     app.use(this.router.routes())

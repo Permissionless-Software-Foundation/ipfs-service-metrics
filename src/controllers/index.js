@@ -26,6 +26,9 @@ class Controllers {
   // Spin up any adapter libraries that have async startup needs.
   async initAdapters () {
     await this.adapters.start()
+
+    // Refresh the Use Case library so they have any updates to the adapters library.
+    this.useCases = new UseCases({ adapters: this.adapters })
   }
 
   // Run any Use Cases to startup the app.
