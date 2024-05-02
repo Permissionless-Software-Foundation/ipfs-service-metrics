@@ -308,11 +308,17 @@ class MetricUseCases {
           thisConsumer.targetCidIsValid = false
         } else {
           if (i === 0) {
-            this.targetCid = fileData.pins.pins[1].cid
+            // Get the last psf-metrics file in the file list.
+            let targetFile = fileData.pins.pins.filter(x => x.filename.includes('psf-metrics'))
+            if (targetFile.length === 0) throw new Error('No psf-metrics JSON file found in pin list')
+
+            targetFile = targetFile[0]
+
+            this.targetCid = targetFile.cid
 
             thisConsumer.targetCid = this.targetCid
-            thisConsumer.targetCidIsValid = fileData.pins.pins[1].validClaim
-            thisConsumer.targetCidIsPinned = fileData.pins.pins[1].dataPinned
+            thisConsumer.targetCidIsValid = targetFile.validClaim
+            thisConsumer.targetCidIsPinned = targetFile.dataPinned
           } else {
             thisConsumer.targetCid = this.targetCid
 
@@ -335,7 +341,7 @@ class MetricUseCases {
         url = `${web2Api}/bch/utxos`
         const bchResult = await this.axios.post(url, { address })
         const utxos = bchResult.data
-        console.log('utxos: ', JSON.stringify(utxos, null, 2))
+        // console.log('utxos: ', JSON.stringify(utxos, null, 2))
 
         thisConsumer.walletServiceWorking = false
 
@@ -443,7 +449,7 @@ class MetricUseCases {
         claimTxid
       }
     } catch (err) {
-      console.error('Error in publishReport()')
+      console.error('publishReport() could not publish report: ', err.message)
       throw err
     }
   }
